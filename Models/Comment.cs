@@ -5,11 +5,11 @@ namespace DotnetWebApi.Models;
 
 public partial class Comment
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 
-    public int ArticleId { get; set; }
+    public Guid ArticleId { get; set; }
 
     public string Contents { get; set; } = null!;
 

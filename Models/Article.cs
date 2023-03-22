@@ -5,9 +5,9 @@ namespace DotnetWebApi.Models;
 
 public partial class Article
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
-    public int UserId { get; set; }
+    public Guid UserId { get; set; }
 
     public string Title { get; set; } = null!;
 
