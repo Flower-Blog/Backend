@@ -7,11 +7,11 @@ public partial class Flower
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; }
 
-    public string Language { get; set; } = null!;
+    public string Language { get; set; }
 
     public virtual ICollection<FlowerGiver> FlowerGivers { get; } = new List<FlowerGiver>();
 
-    public virtual ICollection<FlowerOwnership> FlowerOwnerships { get; } = new List<FlowerOwnership>();
+    public virtual ICollection<FlowerOwnerShip> FlowerOwnerShips { get; } = new List<FlowerOwnerShip>();
 }

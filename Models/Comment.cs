@@ -11,13 +11,13 @@ public partial class Comment
 
     public Guid ArticleId { get; set; }
 
-    public string Contents { get; set; } = null!;
+    public string Contents { get; set; }
+
+    public int Likes { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public virtual Article Article { get; set; }
 
-    public virtual Article Article { get; set; } = null!;
-
-    public virtual User User { get; set; } = null!;
+    public virtual User User { get; set; }
 }

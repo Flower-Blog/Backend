@@ -15,209 +15,174 @@ public partial class BlogContext : DbContext
     {
     }
 
-    public virtual DbSet<Article> Articles { get; set; } = null!;
+    public virtual DbSet<Article> Articles { get; set; }
 
-    public virtual DbSet<Comment> Comments { get; set; } = null!;
+    public virtual DbSet<Comment> Comments { get; set; }
 
-    public virtual DbSet<Flower> Flowers { get; set; } = null!;
+    public virtual DbSet<Flower> Flowers { get; set; }
 
-    public virtual DbSet<FlowerGiver> FlowerGivers { get; set; } = null!;
+    public virtual DbSet<FlowerGiver> FlowerGivers { get; set; }
 
-    public virtual DbSet<FlowerOwnership> FlowerOwnerships { get; set; } = null!;
+    public virtual DbSet<FlowerOwnerShip> FlowerOwnerShips { get; set; }
 
-    public virtual DbSet<Level> Levels { get; set; } = null!;
+    public virtual DbSet<Like> Likes { get; set; }
 
-    public virtual DbSet<User> Users { get; set; } = null!;
+    public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Article>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Articles__3213E83F12483DC5");
+            entity.HasKey(e => e.Id).HasName("PK__Articles__3214EC07794FE530");
 
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("(newid())")
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Contents)
+                .IsRequired()
                 .HasMaxLength(255)
-                .IsUnicode(false)
-                .HasColumnName("contents");
+                .IsUnicode(false);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.Title)
+                .HasColumnType("datetime");
+            entity.Property(e => e.SubStandard)
+                .IsRequired()
                 .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("title");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-            entity.Property(e => e.UserId).HasColumnName("userId");
+                .IsUnicode(false);
+            entity.Property(e => e.Title)
+                .IsRequired()
+                .HasMaxLength(42)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.User).WithMany(p => p.Articles)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Articles__userId__17F790F9");
+                .HasConstraintName("FK__Articles__UserId__4AB81AF0");
         });
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comments__3213E83F1A465764");
+            entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC07D09F94E6");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
-            entity.Property(e => e.ArticleId).HasColumnName("articleId");
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Contents)
+                .IsRequired()
                 .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("contents");
+                .IsUnicode(false);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-            entity.Property(e => e.UserId).HasColumnName("userId");
+                .HasColumnType("datetime");
 
             entity.HasOne(d => d.Article).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comments__articl__19DFD96B");
+                .HasConstraintName("FK__Comments__Articl__4CA06362");
 
             entity.HasOne(d => d.User).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comments__userId__18EBB532");
+                .HasConstraintName("FK__Comments__UserId__4BAC3F29");
         });
 
         modelBuilder.Entity<Flower>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Flowers__3213E83FC6CE96DA");
+            entity.HasKey(e => e.Id).HasName("PK__Flowers__3214EC0780F60561");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
             entity.Property(e => e.Language)
+                .IsRequired()
                 .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("language");
+                .IsUnicode(false);
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("name");
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<FlowerGiver>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FlowerGi__3213E83F8A3AAB87");
+            entity.HasKey(e => e.Id).HasName("PK__FlowerGi__3214EC071AEA7D30");
 
             entity.ToTable("FlowerGiver");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.Flowerid).HasColumnName("flowerid");
-            entity.Property(e => e.TargetId).HasColumnName("targetId");
-            entity.Property(e => e.TargetType)
-                .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("targetType");
-            entity.Property(e => e.UserId).HasColumnName("userId");
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Article).WithMany(p => p.FlowerGivers)
+                .HasForeignKey(d => d.ArticleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__FlowerGiv__Artic__5165187F");
 
             entity.HasOne(d => d.Flower).WithMany(p => p.FlowerGivers)
-                .HasForeignKey(d => d.Flowerid)
+                .HasForeignKey(d => d.FlowerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__FlowerGiv__flowe__1AD3FDA4");
+                .HasConstraintName("FK__FlowerGiv__Flowe__4F7CD00D");
 
             entity.HasOne(d => d.User).WithMany(p => p.FlowerGivers)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__FlowerGiv__userI__1BC821DD");
+                .HasConstraintName("FK__FlowerGiv__UserI__5070F446");
         });
 
-        modelBuilder.Entity<FlowerOwnership>(entity =>
+        modelBuilder.Entity<FlowerOwnerShip>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FlowerOw__3213E83F9B57B1EF");
+            entity.HasKey(e => e.Id).HasName("PK__FlowerOw__3214EC0757BEB544");
 
-            entity.ToTable("FlowerOwnership");
+            entity.ToTable("FlowerOwnerShip");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
-            entity.Property(e => e.FlowerCount).HasColumnName("flowerCount");
-            entity.Property(e => e.Flowerid).HasColumnName("flowerid");
-            entity.Property(e => e.UserId).HasColumnName("userId");
-
-            entity.HasOne(d => d.Flower).WithMany(p => p.FlowerOwnerships)
+            entity.HasOne(d => d.Flower).WithMany(p => p.FlowerOwnerShips)
                 .HasForeignKey(d => d.Flowerid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__FlowerOwn__flowe__1DB06A4F");
+                .HasConstraintName("FK__FlowerOwn__Flowe__534D60F1");
 
-            entity.HasOne(d => d.User).WithMany(p => p.FlowerOwnerships)
+            entity.HasOne(d => d.User).WithMany(p => p.FlowerOwnerShips)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__FlowerOwn__userI__1CBC4616");
+                .HasConstraintName("FK__FlowerOwn__UserI__52593CB8");
         });
 
-        modelBuilder.Entity<Level>(entity =>
+        modelBuilder.Entity<Like>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Level__3213E83F55806AD1");
+            entity.HasNoKey();
 
-            entity.ToTable("Level");
+            entity.HasOne(d => d.Comment).WithMany()
+                .HasForeignKey(d => d.CommentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Likes__CommentId__4D94879B");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
-            entity.Property(e => e.Name)
-                .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("name");
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Likes__UserId__4E88ABD4");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3213E83F3FFE13B2");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC0724A23662");
 
-            entity.Property(e => e.Id)
-                .HasDefaultValueSql("(newid())")
-                .HasColumnName("id");
-            entity.Property(e => e.Account)
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Address)
+                .IsRequired()
                 .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("account");
-            entity.Property(e => e.Admin).HasColumnName("admin");
+                .IsUnicode(false);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("createdAt");
-            entity.Property(e => e.LevelId).HasColumnName("levelId");
+                .HasColumnType("datetime");
+            entity.Property(e => e.Email)
+                .IsRequired()
+                .HasMaxLength(255)
+                .IsUnicode(false);
             entity.Property(e => e.Name)
+                .IsRequired()
                 .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("name");
-            entity.Property(e => e.Password)
-                .HasMaxLength(42)
-                .IsUnicode(false)
-                .HasColumnName("password");
+                .IsUnicode(false);
+            entity.Property(e => e.Nonce)
+                .IsRequired()
+                .HasMaxLength(255)
+                .IsUnicode(false);
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("updatedAt");
-
-            entity.HasOne(d => d.Level).WithMany(p => p.Users)
-                .HasForeignKey(d => d.LevelId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Users__levelId__17036CC0");
+                .HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);

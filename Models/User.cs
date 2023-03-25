@@ -7,13 +7,13 @@ public partial class User
 {
     public Guid Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; }
 
-    public string Account { get; set; } = null!;
+    public string Address { get; set; }
 
-    public string Password { get; set; } = null!;
+    public string Email { get; set; }
 
-    public int LevelId { get; set; }
+    public string Nonce { get; set; }
 
     public bool Admin { get; set; }
 
@@ -27,7 +27,5 @@ public partial class User
 
     public virtual ICollection<FlowerGiver> FlowerGivers { get; } = new List<FlowerGiver>();
 
-    public virtual ICollection<FlowerOwnership> FlowerOwnerships { get; } = new List<FlowerOwnership>();
-
-    public virtual Level Level { get; set; } = null!;
+    public virtual ICollection<FlowerOwnerShip> FlowerOwnerShips { get; } = new List<FlowerOwnerShip>();
 }

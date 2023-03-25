@@ -9,15 +9,17 @@ public partial class Article
 
     public Guid UserId { get; set; }
 
-    public string Title { get; set; } = null!;
+    public string Title { get; set; }
 
-    public string Contents { get; set; } = null!;
+    public string SubStandard { get; set; }
+
+    public string Contents { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
-
     public virtual ICollection<Comment> Comments { get; } = new List<Comment>();
 
-    public virtual User User { get; set; } = null!;
+    public virtual ICollection<FlowerGiver> FlowerGivers { get; } = new List<FlowerGiver>();
+
+    public virtual User User { get; set; }
 }
