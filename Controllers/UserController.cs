@@ -14,15 +14,7 @@ namespace DotnetWebApi.Controllers
         {
             _dbContext = dbContext;
         }
-        // TODO: 創建使用者
 
-        [HttpPost]
-        public ActionResult CreateUser([FromBody] string Address)
-        {
-            var result = _dbContext.Users.Find(Address);
-            return Ok();
-        }
+
     }
 }
-
-
