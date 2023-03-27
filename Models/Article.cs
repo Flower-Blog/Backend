@@ -11,6 +11,8 @@ public partial class Article
 
     public string Title { get; set; }
 
+    public bool State { get; set; }
+
     public string SubStandard { get; set; }
 
     public string Contents { get; set; }

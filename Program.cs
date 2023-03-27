@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using DotnetWebApi.Models;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using DotnetWebApi.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,9 @@ builder.Services.AddDbContext<BlogContext>(options =>
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
+builder.Services.AddSingleton<IMailService, MailService>();
 
 var app = builder.Build();
 

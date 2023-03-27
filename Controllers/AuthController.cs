@@ -1,4 +1,5 @@
 using DotnetWebApi.Dto;
+using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,28 +11,31 @@ namespace DotnetWebApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly BlogContext _dbContext;
-        public AuthController(BlogContext dbContext)
+        private readonly IMailService _mailService;
+
+        public AuthController(BlogContext dbContext, IMailService mailService)
         {
             _dbContext = dbContext;
+            _mailService = mailService;
         }
 
         /// <summary>
         /// 確認是否是會員
         /// </summary>
-        /// <param name="address" example="0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089">會員Id</param>
+        /// <param name="address" example="0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089">會員錢包地址</param>
         /// <returns></returns>
-        [HttpGet("/auth/login/{address}")]
-        public ActionResult CreateUser(string address)
+        [HttpGet("/auth/register/{address}")]
+        public ActionResult IsUser(string address)
         {
-            var user = (from x in _dbContext.Users
-                        where x.Address == address
-                        select x).FirstOrDefault();
+            var userETF = (from x in _dbContext.Users
+                           where x.Address == address
+                           select x).FirstOrDefault();
 
-            if (user != null)
+            if (userETF != null)
             {
                 var guid = Guid.NewGuid().ToString();
-                user.Nonce = guid;
-                _dbContext.Entry(user).State = EntityState.Modified;
+                userETF.Nonce = guid;
+                _dbContext.Entry(userETF).State = EntityState.Modified;
                 _dbContext.SaveChanges();
 
                 return Ok(new
@@ -40,9 +44,14 @@ namespace DotnetWebApi.Controllers
                     nonce = guid
                 });
             }
-
-            return NotFound();
+            return NotFound(new
+            {
+                StatusCode = 404,
+                Title = "已經註冊過"
+            });
         }
+
 
     }
 }
+
