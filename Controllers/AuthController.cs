@@ -113,7 +113,7 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 確認是否是會員
         /// </summary>
-        /// <param name="address" example="0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089">會員錢包地址</param>
+        /// <param name="address" example="0x34B605B3d13923a60a629794C15B103C44beaE1c">會員錢包地址</param>
         /// <returns></returns>
         [HttpGet("/auth/login/{address}")]
         [Produces("application/json")]
@@ -148,8 +148,8 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 確認電子郵件驗證碼是否正確
         /// </summary>
-        /// <param name="Email" example="andy@gmail.com">會員錢包地址</param>
-        /// <param name="VerificationCode" example="96418ffa-b262-4f8c-a9f6-ac40d5455eba">會員錢包地址</param>
+        /// <param name="Email" example="andy@gmail.com">信箱</param>
+        /// <param name="VerificationCode" example="96418ffa-b262-4f8c-a9f6-ac40d5455eba">信箱驗證碼</param>
         /// <returns></returns>
         [HttpGet("/auth/register/{Email}/{VerificationCode}")]
         [Produces("application/json")]

@@ -14,8 +14,8 @@ namespace DotnetWebApi.Dto
         /// <example>200</example>
         public string StatusCode { get; set; }
 
-        /// <example>3fa85f64-5717-4562-b3fc-2c963f66afa6</example>
-        public string Nonce { get; set; }
+        /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQW5keSIsImVtYWlsIjoiYW5keUBnbWFpbC5jb20iLCJhZGRyZXNzIjoiMHhFRmE0QWJhYzdGZWRCOEYwNTE0YmVFNzIxMmRjMTlENTIzREQzMDg5IiwiZXhwIjoxNjc5OTUzNDk5LCJpc3MiOiJGbG93ZXIgQmxvZyIsImF1ZCI6IlVzZXIifQ.8aJTuL0MlxzuKxys9HOi9N--RVBXGZP1JM9BTatXamw</example>
+        public string Token { get; set; }
 
     }
     public class LoginDto404

@@ -130,7 +130,7 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 確認使用者名稱是否使用過
         /// </summary>
-        /// <param name="name" example="Andy">會員Email</param>
+        /// <param name="name" example="Andy">會員名稱</param>
         /// <returns></returns>
         [HttpGet("/user/register/name/{name}")]
         [Produces("application/json")]

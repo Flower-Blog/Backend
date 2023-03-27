@@ -13,7 +13,7 @@ namespace DotnetWebApi.Dto
     }
     public class RegisterNameDto404
     {
-        /// <example>200</example>
+        /// <example>404</example>
         public string StatusCode { get; set; }
 
         /// <example>名稱未已被使用過</example>
