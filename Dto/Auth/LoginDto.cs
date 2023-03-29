@@ -18,9 +18,9 @@ namespace DotnetWebApi.Dto
         public string Token { get; set; }
 
     }
-    public class LoginDto404
+    public class LoginDto401
     {
-        /// <example>404</example>
+        /// <example>401</example>
         public string StatusCode { get; set; }
 
         /// <example>登入驗證失敗</example>

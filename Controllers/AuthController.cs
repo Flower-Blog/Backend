@@ -34,7 +34,7 @@ namespace DotnetWebApi.Controllers
         [HttpPost("/auth/login")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(LoginDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(LoginDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(LoginDto401), StatusCodes.Status401Unauthorized)]
         public ActionResult Login(LoginDto value)
         {
             var userETF = (from x in _dbContext.Users
@@ -50,9 +50,10 @@ namespace DotnetWebApi.Controllers
                     token = token
                 });
             }
-            return NotFound(new
+
+            return Unauthorized(new
             {
-                StatusCode = 404,
+                StatusCode = 401,
                 Title = "登入驗證失敗"
             });
         }
@@ -118,7 +119,7 @@ namespace DotnetWebApi.Controllers
         [HttpGet("/auth/login/{address}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(IsUserDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(IsUserDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(IsUserDto401), StatusCodes.Status404NotFound)]
         public ActionResult IsUser(string address)
         {
             var userETF = (from x in _dbContext.Users
@@ -138,9 +139,9 @@ namespace DotnetWebApi.Controllers
                     nonce = guid
                 });
             }
-            return NotFound(new
+            return Unauthorized(new
             {
-                StatusCode = 404,
+                StatusCode = 401,
                 Title = "已經註冊過"
             });
         }
@@ -154,14 +155,25 @@ namespace DotnetWebApi.Controllers
         [HttpGet("/auth/register/{Email}/{VerificationCode}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ConfirmationEMailDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ConfirmationEMailDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ConfirmationEMailDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ConfirmationEMailDto400), StatusCodes.Status404NotFound)]
         public ActionResult ConfirmationEMail(string Email, string VerificationCode)
         {
             var mailETF = (from x in _dbContext.Mail
                            where x.Email == Email && x.VerificationCode == VerificationCode
                            select x).FirstOrDefault();
+            var TimeGap = DateTime.Now - mailETF.UpdatedAt;
+            var tenMinutes = new TimeSpan(0, 1, 0);
 
-            if (mailETF != null)
+            if (TimeGap > tenMinutes)
+            {
+                return Unauthorized(new
+                {
+                    StatusCode = 401,
+                    Title = "超過10分鐘的驗證時間"
+                });
+            }
+            else if (mailETF != null)
             {
                 var guid = Guid.NewGuid().ToString();
                 var userETF = (from x in _dbContext.Users
@@ -181,10 +193,11 @@ namespace DotnetWebApi.Controllers
                     name = guid
                 });
             }
-            return NotFound(new
+
+            return BadRequest(new
             {
-                StatusCode = 404,
-                Title = "驗證錯誤"
+                StatusCode = 400,
+                Title = "信箱驗證錯誤"
             });
         }
     }

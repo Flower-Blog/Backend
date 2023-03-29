@@ -11,9 +11,9 @@ namespace DotnetWebApi.Dto
         public string Nonce { get; set; }
 
     }
-    public class IsUserDto404
+    public class IsUserDto401
     {
-        /// <example>404</example>
+        /// <example>401</example>
         public string StatusCode { get; set; }
 
         /// <example>已經註冊過</example>

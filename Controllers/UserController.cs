@@ -1,3 +1,4 @@
+using System.Dynamic;
 using DotnetWebApi.Dto;
 using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
@@ -23,13 +24,22 @@ namespace DotnetWebApi.Controllers
         /// </summary>
         [HttpPost("/user/register")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(RegisterDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(RegisterDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(RegisterDto201), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RegisterDto409), StatusCodes.Status409Conflict)]
         public ActionResult Register(RegisterDto value)
         {
             var userETF = (from x in _dbContext.Users
                            where x.Email == value.Email || x.Name == value.Name || x.Address == value.Address
                            select x).FirstOrDefault();
+            var EmailUse = (from x in _dbContext.Users
+                            where x.Email == value.Email
+                            select x).FirstOrDefault();
+            var NameUse = (from x in _dbContext.Users
+                           where x.Name == value.Name
+                           select x).FirstOrDefault();
+            var AddressUse = (from x in _dbContext.Users
+                              where x.Address == value.Address
+                              select x).FirstOrDefault();
 
             if (userETF == null)
             {
@@ -43,20 +53,16 @@ namespace DotnetWebApi.Controllers
                 });
                 _dbContext.SaveChanges();
 
-                return Ok(new
-                {
-                    StatusCode = 404,
-                    Title = "拒絕成功"
-                });
-                // FIXME: 記得改成201狀態碼
-                // return new ObjectResult(entity) { StatusCode = StatusCodes.Status201Created };
+                return CreatedAtAction("IsUser", "Auth", new { address = value.Address }, value);
+
             }
-            // FIXME: 記得改成403狀態碼
-            return NotFound(new
-            {
-                StatusCode = 404,
-                Title = "拒絕註冊"
-            });
+            dynamic response = new ExpandoObject();
+            response.StatusCode = 409;
+            response.Title = "有資料被使用過了 拒絕註冊";
+            if (EmailUse != null) response.Email = "信箱被使用過";
+            if (NameUse != null) response.Name = "名稱被使用過";
+            if (AddressUse != null) response.Address = "地址被使用過";
+            return Conflict(response);
         }
 
         /// <summary>
@@ -80,7 +86,9 @@ namespace DotnetWebApi.Controllers
 
             if (userETF == null)
             {
-                var VerificationCode = Guid.NewGuid().ToString();
+                Random rd = new Random();
+                var VerificationCode = rd.Next(100000, 1000000).ToString();
+
                 // 找不到使用者email 就幫他新增進去
                 if (mailETF == null)
                 {
@@ -95,6 +103,7 @@ namespace DotnetWebApi.Controllers
                 else
                 {
                     mailETF.VerificationCode = VerificationCode;
+                    mailETF.UpdatedAt = DateTime.Now;
                     _dbContext.Entry(mailETF).State = EntityState.Modified;
                     _dbContext.SaveChanges();
                 }
@@ -105,7 +114,7 @@ namespace DotnetWebApi.Controllers
                     MailRequest request = new MailRequest();
                     request.ToEmail = email;
                     request.Subject = "Floor Blog 電子郵件驗證";
-                    request.Body = $"<h1>驗證碼為:</h1><p>{VerificationCode}</p>";
+                    request.Body = _mailService.MailBody(VerificationCode);
                     await _mailService.SendEmailiAsync(request);
                     return Ok(new
                     {
