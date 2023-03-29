@@ -11,6 +11,22 @@ namespace DotnetWebApi.Dto
         public string Name { get; set; }
 
     }
+    public class ConfirmationEMailDto400
+    {
+
+        /// <example>https://tools.ietf.org/html/rfc7231#section-6.5.1</example>
+        public string type { get; set; }
+
+        /// <example>One or more validation errors occurred.</example>
+        public string title { get; set; }
+
+        /// <example>400</example>
+        public string status { get; set; }
+
+        /// <example>{"email": ["email格式不正確"],"verificationCode": ["驗證碼格式不正確 提示只有6碼"]}</example>
+        public object errors { get; set; }
+
+    }
     public class ConfirmationEMailDto401
     {
         /// <example>401</example>
@@ -20,9 +36,9 @@ namespace DotnetWebApi.Dto
         public string Title { get; set; }
 
     }
-    public class ConfirmationEMailDto400
+    public class ConfirmationEMailDto404
     {
-        /// <example>400</example>
+        /// <example>404</example>
         public string StatusCode { get; set; }
 
         /// <example>信箱驗證錯誤</example>

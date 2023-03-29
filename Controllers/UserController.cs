@@ -1,4 +1,5 @@
 using System.Dynamic;
+using System.Text.RegularExpressions;
 using DotnetWebApi.Dto;
 using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
@@ -25,6 +26,7 @@ namespace DotnetWebApi.Controllers
         [HttpPost("/user/register")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(RegisterDto201), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RegisterDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(RegisterDto409), StatusCodes.Status409Conflict)]
         public ActionResult Register(RegisterDto value)
         {
@@ -68,14 +70,25 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 確認電子郵件是否使用過
         /// </summary>
-        /// <param name="email" example="andy@gmail.com">會員Email</param>
+        /// <param name="email" example="andy910812@gmail.com">會員Email</param>
         /// <returns></returns>
         [HttpGet("/user/register/email/{email}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(RegisterEmailDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(RegisterEmailDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(RegisterEmailDto404), StatusCodes.Status404NotFound)]
         public async Task<ActionResult> RegisterEmail(string email)
         {
+            if (Regex.IsMatch(email, @"^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$") == false)
+            {
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = new { address = new[] { "email格式不正確" } }
+                });
+            }
             var userETF = (from x in _dbContext.Users
                            where x.Email == email
                            select x).FirstOrDefault();
@@ -133,6 +146,7 @@ namespace DotnetWebApi.Controllers
                 StatusCode = 404,
                 Title = "信箱已被使用過"
             });
+
         }
 
 

@@ -16,7 +16,7 @@ namespace DotnetWebApi.Dto
         /// <example>404</example>
         public string StatusCode { get; set; }
 
-        /// <example>名稱未已被使用過</example>
+        /// <example>名稱已被使用過</example>
         public string Title { get; set; }
     }
 }

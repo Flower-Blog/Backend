@@ -1,6 +1,8 @@
+using System.Dynamic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using DotnetWebApi.Dto;
 using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
@@ -34,6 +36,7 @@ namespace DotnetWebApi.Controllers
         [HttpPost("/auth/login")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(LoginDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(LoginDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(LoginDto401), StatusCodes.Status401Unauthorized)]
         public ActionResult Login(LoginDto value)
         {
@@ -119,9 +122,20 @@ namespace DotnetWebApi.Controllers
         [HttpGet("/auth/login/{address}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(IsUserDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(IsUserDto401), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(IsUserDto400), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(IsUserDto401), StatusCodes.Status401Unauthorized)]
         public ActionResult IsUser(string address)
         {
+            if (address.Length > 42)
+            {
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = new { address = new[] { "address不得高於42個字元" } }
+                });
+            }
             var userETF = (from x in _dbContext.Users
                            where x.Address == address
                            select x).FirstOrDefault();
@@ -142,39 +156,52 @@ namespace DotnetWebApi.Controllers
             return Unauthorized(new
             {
                 StatusCode = 401,
-                Title = "已經註冊過"
+                Title = "找不到該使用者"
             });
         }
 
         /// <summary>
         /// 確認電子郵件驗證碼是否正確
         /// </summary>
-        /// <param name="Email" example="andy@gmail.com">信箱</param>
-        /// <param name="VerificationCode" example="96418ffa-b262-4f8c-a9f6-ac40d5455eba">信箱驗證碼</param>
+        /// <param name="Email" example="andy910812@gmail.com">信箱</param>
+        /// <param name="VerificationCode" example="684414">信箱驗證碼</param>
         /// <returns></returns>
         [HttpGet("/auth/register/{Email}/{VerificationCode}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ConfirmationEMailDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ConfirmationEMailDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ConfirmationEMailDto401), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ConfirmationEMailDto400), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ConfirmationEMailDto404), StatusCodes.Status404NotFound)]
         public ActionResult ConfirmationEMail(string Email, string VerificationCode)
         {
+            if (Regex.IsMatch(Email, @"^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$") == false || VerificationCode.Length != 6)
+            {
+                dynamic response = new ExpandoObject();
+                response.type = "https://tools.ietf.org/html/rfc7231#section-6.5.1";
+                response.title = "One or more validation errors occurred.";
+                response.status = 400;
+                dynamic errorsresponse = new ExpandoObject();
+                if (!Regex.IsMatch(Email, @"^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$")) errorsresponse.email = new[] { "email格式不正確" };
+                if (VerificationCode.Length != 6) errorsresponse.verificationCode = new[] { "驗證碼格式不正確 提示只有6碼" };
+                response.errors = errorsresponse;
+                return BadRequest(response);
+            }
             var mailETF = (from x in _dbContext.Mail
                            where x.Email == Email && x.VerificationCode == VerificationCode
                            select x).FirstOrDefault();
-            var TimeGap = DateTime.Now - mailETF.UpdatedAt;
-            var tenMinutes = new TimeSpan(0, 1, 0);
 
-            if (TimeGap > tenMinutes)
+            if (mailETF != null)
             {
-                return Unauthorized(new
+                var TimeGap = DateTime.Now - mailETF.UpdatedAt;
+                var tenMinutes = new TimeSpan(0, 10, 0);
+                if (TimeGap > tenMinutes)
                 {
-                    StatusCode = 401,
-                    Title = "超過10分鐘的驗證時間"
-                });
-            }
-            else if (mailETF != null)
-            {
+                    return Unauthorized(new
+                    {
+                        StatusCode = 401,
+                        Title = "超過10分鐘的驗證時間"
+                    });
+                }
                 var guid = Guid.NewGuid().ToString();
                 var userETF = (from x in _dbContext.Users
                                where x.Name == guid
@@ -194,10 +221,10 @@ namespace DotnetWebApi.Controllers
                 });
             }
 
-            return BadRequest(new
+            return NotFound(new
             {
-                StatusCode = 400,
-                Title = "信箱驗證錯誤"
+                StatusCode = 404,
+                title = "信箱驗證錯誤"
             });
         }
     }
