@@ -96,6 +96,8 @@ namespace DotnetWebApi.Controllers
             var mailETF = (from x in _dbContext.Mail
                            where x.Email == email
                            select x).FirstOrDefault();
+            var test = (from x in _dbContext.Mail
+                        select x).Count();
 
             if (userETF == null)
             {
@@ -105,10 +107,12 @@ namespace DotnetWebApi.Controllers
                 // 找不到使用者email 就幫他新增進去
                 if (mailETF == null)
                 {
-                    _dbContext.Mail.Add(new Mail
+                    Console.WriteLine("email: " + email);
+                    Console.WriteLine("VerificationCode: " + VerificationCode);
+                    var entity = _dbContext.Mail.Add(new Mail
                     {
                         Email = email,
-                        VerificationCode = VerificationCode
+                        VerificationCode = VerificationCode,
                     });
                     _dbContext.SaveChanges();
                 }

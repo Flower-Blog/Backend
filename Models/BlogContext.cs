@@ -32,6 +32,7 @@ public partial class BlogContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Article>(entity =>
@@ -160,13 +161,14 @@ public partial class BlogContext : DbContext
 
         modelBuilder.Entity<Mail>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK__Mail__3214EC0711774E7E");
+
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Email)
                 .IsRequired()
-                .HasMaxLength(255)
+                .HasMaxLength(42)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
