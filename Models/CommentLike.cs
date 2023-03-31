@@ -3,11 +3,13 @@ using System.Collections.Generic;
 
 namespace DotnetWebApi.Models;
 
-public partial class Like
+public partial class CommentLike
 {
-    public Guid CommentId { get; set; }
+    public int UserId { get; set; }
 
-    public Guid UserId { get; set; }
+    public int CommentId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
 
     public virtual Comment Comment { get; set; }
 

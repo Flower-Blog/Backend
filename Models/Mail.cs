@@ -9,7 +9,9 @@ public partial class Mail
 
     public string Email { get; set; }
 
-    public string VerificationCode { get; set; }
+    public int VerificationCode { get; set; }
+
+    public bool Verified { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

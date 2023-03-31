@@ -41,7 +41,7 @@ namespace DotnetWebApi.Dto
         /// <example>404</example>
         public string StatusCode { get; set; }
 
-        /// <example>信箱驗證錯誤</example>
+        /// <example>信箱驗證錯誤 或是 此信箱根本沒有發送過驗證碼歐!</example>
         public string Title { get; set; }
 
     }

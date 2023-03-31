@@ -5,19 +5,21 @@ namespace DotnetWebApi.Models;
 
 public partial class Article
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public string Title { get; set; }
-
-    public bool State { get; set; }
 
     public string SubStandard { get; set; }
 
     public string Contents { get; set; }
 
+    public bool State { get; set; }
+
     public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 
     public virtual ICollection<Comment> Comments { get; } = new List<Comment>();
 

@@ -102,7 +102,7 @@ namespace DotnetWebApi.Controllers
             if (userETF == null)
             {
                 Random rd = new Random();
-                var VerificationCode = rd.Next(100000, 1000000).ToString();
+                var VerificationCode = rd.Next(100000, 1000000);
 
                 // 找不到使用者email 就幫他新增進去
                 if (mailETF == null)
@@ -131,7 +131,7 @@ namespace DotnetWebApi.Controllers
                     MailRequest request = new MailRequest();
                     request.ToEmail = email;
                     request.Subject = "Floor Blog 電子郵件驗證";
-                    request.Body = _mailService.MailBody(VerificationCode);
+                    request.Body = _mailService.MailBody(VerificationCode.ToString());
                     await _mailService.SendEmailiAsync(request);
                     return Ok(new
                     {

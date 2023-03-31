@@ -31,12 +31,12 @@ namespace DotnetWebApi.Dto
         public string status { get; set; }
 
 
-        /// <example>{"address": ["address不得高於42個字元"]}</example>
+        /// <example>{"address": ["address必須等於42個字元"]}</example>
         public object errors { get; set; }
     }
-    public class IsUserDto401
+    public class IsUserDto404
     {
-        /// <example>401</example>
+        /// <example>404</example>
         public string StatusCode { get; set; }
 
         /// <example>找不到該使用者</example>

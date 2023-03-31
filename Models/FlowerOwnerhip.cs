@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace DotnetWebApi.Models;
 
-public partial class FlowerOwnerShip
+public partial class FlowerOwnerhip
 {
     public int Id { get; set; }
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     public int Flowerid { get; set; }
 

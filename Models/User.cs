@@ -5,7 +5,7 @@ namespace DotnetWebApi.Models;
 
 public partial class User
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string Name { get; set; }
 
@@ -23,9 +23,11 @@ public partial class User
 
     public virtual ICollection<Article> Articles { get; } = new List<Article>();
 
+    public virtual ICollection<CommentLike> CommentLikes { get; } = new List<CommentLike>();
+
     public virtual ICollection<Comment> Comments { get; } = new List<Comment>();
 
     public virtual ICollection<FlowerGiver> FlowerGivers { get; } = new List<FlowerGiver>();
 
-    public virtual ICollection<FlowerOwnerShip> FlowerOwnerShips { get; } = new List<FlowerOwnerShip>();
+    public virtual ICollection<FlowerOwnerhip> FlowerOwnerhips { get; } = new List<FlowerOwnerhip>();
 }
