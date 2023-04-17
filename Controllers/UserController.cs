@@ -130,7 +130,7 @@ namespace DotnetWebApi.Controllers
                 {
                     MailRequest request = new MailRequest();
                     request.ToEmail = email;
-                    request.Subject = "Floor Blog 電子郵件驗證";
+                    request.Subject = "Flower Blog 電子郵件驗證";
                     request.Body = _mailService.MailBody(VerificationCode.ToString());
                     await _mailService.SendEmailiAsync(request);
                     return Ok(new

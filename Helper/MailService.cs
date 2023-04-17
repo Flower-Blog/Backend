@@ -136,7 +136,7 @@ namespace DotnetWebApi.Helper
                                 </h1>
                                 <p style=""margin: 0; padding: 0"">
                                 感謝您開始新
-                                <span class=""il"">Floor Blog</span>
+                                <span class=""il"">Flower Blog</span>
                                 帳戶的建立程序。我們欲確定這是您本人所進行的操作。<wbr />請在提示出現時輸入以下驗證碼。若您不想建立帳戶，<wbr />則可忽略此訊息。
                                 </p>
                                 <p style=""margin: 0; padding: 0""></p>
@@ -184,7 +184,7 @@ namespace DotnetWebApi.Helper
                                 ""
                             >
                                 <p style=""margin: 0 0 15px 0; padding: 0 0 0 0"">
-                                Floor Blog 絕不會傳送電子郵件給您，要求您公開或驗證您的密碼
+                                Flower Blog 絕不會傳送電子郵件給您，要求您公開或驗證您的密碼
                                 </p>
                             </td>
                             </tr>
@@ -213,7 +213,7 @@ namespace DotnetWebApi.Helper
                                 text-align: center;
                                 ""
                             >
-                                此訊息由 Floor Blog© 2022, Floor Blog, Inc. 保留所有權利。
+                                此訊息由 Flower Blog© 2022, Flower Blog, Inc. 保留所有權利。
                             </td>
                             </tr>
                         </tbody>

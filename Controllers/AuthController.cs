@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using DotnetWebApi.Dto;
+using DotnetWebApi.HandleFunction;
 using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -52,9 +53,9 @@ namespace DotnetWebApi.Controllers
                     Title = "找不到該使用者"
                 });
             }
-            else if (VerifySignature(userETF.Nonce, value.address, value.signature))
+            else if (AuthHandle.VerifySignature(userETF.Nonce, value.address, value.signature))
             {
-                var token = jwtLogin(userETF.Name, userETF.Email, userETF.Address, _configuration["JWT:KEY"], _configuration["JWT:Issuer"], _configuration["JWT:Audience"]);
+                var token = AuthHandle.jwtLogin(userETF.Name, userETF.Email, userETF.Address, _configuration["JWT:KEY"], _configuration["JWT:Issuer"], _configuration["JWT:Audience"]);
                 return Ok(new
                 {
                     StatusCode = 200,
@@ -67,59 +68,6 @@ namespace DotnetWebApi.Controllers
                 StatusCode = 401,
                 Title = "登入驗證失敗"
             });
-        }
-
-        // TODO: 驗證簽證
-        private static bool VerifySignature(string nonce, string address, string signature)
-        {
-            try
-            {
-                var signer = new EthereumMessageSigner();
-                var signerAddress = signer.EncodeUTF8AndEcRecover(nonce, signature);
-                if (signerAddress.ToLower() != address.ToLower())
-                {
-                    return false;
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return false;
-            }
-        }
-        // TODO: 設定TOKEN
-        private static string jwtLogin(string name, string email, string address, string key, string issuer, string audience)
-        {
-            var claims = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Name, name),
-                    new Claim(JwtRegisteredClaimNames.Email, email),
-                    new Claim("address", address)
-                };
-            //設定Role
-            // foreach (var temp in role)
-            // {
-            //     claims.Add(new Claim(ClaimTypes.Role, temp.Name));
-            // }
-            //取出appsettings.json裡的KEY處理
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-
-            //設定jwt相關資訊
-            var jwt = new JwtSecurityToken
-            (
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256)
-            );
-
-
-            var token = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            return token;
         }
 
         /// <summary>
@@ -171,35 +119,35 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 確認電子郵件驗證碼是否正確
         /// </summary>
-        /// <param name="Email" example="andy910812@gmail.com">信箱</param>
-        /// <param name="VerificationCode" example="684414">信箱驗證碼</param>
+        /// <param name="email" example="andy910812@gmail.com">信箱</param>
+        /// <param name="verificationCode" example="684414">信箱驗證碼</param>
         /// <returns></returns>
-        [HttpGet("/auth/register/{Email}/{VerificationCode}")]
+        [HttpGet("/auth/register/{email}/{verificationCode}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ConfirmationEMailDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ConfirmationEMailDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ConfirmationEMailDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(ConfirmationEMailDto404), StatusCodes.Status404NotFound)]
-        public ActionResult ConfirmationEMail(string Email, int VerificationCode)
+        public ActionResult ConfirmationEMail(string email, int verificationCode)
         {
-            if (Regex.IsMatch(Email, @"^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$") == false || VerificationCode < 100000 || VerificationCode > 999999)
+            if (Regex.IsMatch(email, @"^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$") == false || verificationCode < 100000 || verificationCode > 999999)
             {
                 dynamic response = new ExpandoObject();
                 response.type = "https://tools.ietf.org/html/rfc7231#section-6.5.1";
                 response.title = "One or more validation errors occurred.";
                 response.status = 400;
                 dynamic errorsresponse = new ExpandoObject();
-                if (!Regex.IsMatch(Email, @"^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$")) errorsresponse.email = new[] { "email格式不正確" };
-                if (VerificationCode < 100000 || VerificationCode > 999999) errorsresponse.verificationCode = new[] { "驗證碼格式不正確 提示只有6碼" };
+                if (!Regex.IsMatch(email, @"^([\w-]+\.)*?[\w-]+@[\w-]+\.([\w-]+\.)*?[\w]+$")) errorsresponse.email = new[] { "email格式不正確" };
+                if (verificationCode < 100000 || verificationCode > 999999) errorsresponse.verificationCode = new[] { "驗證碼格式不正確 提示只有6碼" };
                 response.errors = errorsresponse;
                 return BadRequest(response);
             }
             var MailETF = (from x in _dbContext.Mail
-                           where x.Email == Email && x.VerificationCode == VerificationCode
+                           where x.Email == email && x.VerificationCode == verificationCode
                            select x).FirstOrDefault();
 
             var IsMail = (from x in _dbContext.Mail
-                          where x.Email == Email
+                          where x.Email == email
                           select x).FirstOrDefault();
 
             if (MailETF != null)
