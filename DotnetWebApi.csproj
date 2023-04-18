@@ -21,8 +21,6 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0"/>
     <PackageReference Include="Nethereum.Hex" Version="4.14.0"/>
     <PackageReference Include="Nethereum.Util" Version="4.14.0"/>
-    <PackageReference Include="NBitcoin" Version="3.0.0"/>
-    <PackageReference Include="BouncyCastle" Version="1.8.9"/>
     <PackageReference Include="JWT" Version="10.0.2"/>
   </ItemGroup>
 </Project>
