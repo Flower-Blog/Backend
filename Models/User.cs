@@ -15,6 +15,12 @@ public partial class User
 
     public string Nonce { get; set; }
 
+    public string Introduction { get; set; }
+
+    public string BackgroundPhoto { get; set; }
+
+    public string Picture { get; set; }
+
     public bool Admin { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -29,5 +35,5 @@ public partial class User
 
     public virtual ICollection<FlowerGiver> FlowerGivers { get; } = new List<FlowerGiver>();
 
-    public virtual ICollection<FlowerOwnerhip> FlowerOwnerhips { get; } = new List<FlowerOwnerhip>();
+    public virtual ICollection<FlowerOwnership> FlowerOwnerships { get; } = new List<FlowerOwnership>();
 }
