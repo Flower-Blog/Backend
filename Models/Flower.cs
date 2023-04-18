@@ -13,5 +13,5 @@ public partial class Flower
 
     public virtual ICollection<FlowerGiver> FlowerGivers { get; } = new List<FlowerGiver>();
 
-    public virtual ICollection<FlowerOwnerhip> FlowerOwnerhips { get; } = new List<FlowerOwnerhip>();
+    public virtual ICollection<FlowerOwnership> FlowerOwnerships { get; } = new List<FlowerOwnership>();
 }
