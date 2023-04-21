@@ -1,8 +1,10 @@
 using System.Dynamic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text.RegularExpressions;
 using DotnetWebApi.Dto;
 using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +23,164 @@ namespace DotnetWebApi.Controllers
         }
 
         /// <summary>
-        /// 註冊
+        /// 獲取自身資料(需攜帶Token)
+        /// </summary>
+        [HttpGet("/user")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(GetUserDataDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserDataDto401), StatusCodes.Status401Unauthorized)]
+        public ActionResult GetUserData()
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
+
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            var userdata = from a in _dbContext.Users
+                           where a.Address == userAddress
+                           select new GetUserDataDto
+                           {
+                               Id = a.Id,
+                               Name = a.Name,
+                               Address = a.Address,
+                               Email = a.Email,
+                               Introduction = a.Introduction,
+                               BackgroundPhoto = a.BackgroundPhoto,
+                               Picture = a.Picture
+                           };
+            return Ok(new
+            {
+                StatusCode = 200,
+                userdata
+            });
+        }
+
+        /// <summary>
+        /// 獲取特定使用者資料
+        /// </summary>
+        [HttpGet("/user/{username}")]
+        [ProducesResponseType(typeof(GetCreaterData200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetCreaterData404), StatusCodes.Status404NotFound)]
+        public ActionResult GetCreaterData(string username)
+        {
+            var userdata = (from a in _dbContext.Users
+                            where a.Name == username
+                            select new GetUserDataDto
+                            {
+                                Id = a.Id,
+                                Name = a.Name,
+                                Address = a.Address,
+                                Email = a.Email,
+                                Introduction = a.Introduction,
+                                BackgroundPhoto = a.BackgroundPhoto,
+                                Picture = a.Picture
+                            }).FirstOrDefault();
+            if (userdata == null)
+            {
+                return NotFound(new
+                {
+                    StatusCode = 404,
+                    title = "找不到該使用者"
+                });
+            }
+
+            return Ok(new
+            {
+                StatusCode = 200,
+                userdata
+            });
+        }
+
+        /// <summary>
+        /// 編輯自身使用者資料
+        /// </summary>
+        [HttpPatch("/user/{address}")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(EditUserData200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(EditUserData400), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(EditUserData401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(EditUserData404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(EditUserData500), StatusCodes.Status500InternalServerError)]
+        public ActionResult EditUserData(string address, [FromBody] EditUserData value)
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
+
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            // 不是找改自己的資料
+            if (userAddress != address)
+            {
+                return BadRequest(new
+                {
+                    StatusCode = 400,
+                    title = "這不是你的帳號歐"
+                });
+            }
+            var user = _dbContext.Users.SingleOrDefault(u => u.Address == address);
+
+            // 更新使用者資料
+            user.Name = value.Name;
+            user.Email = value.Email;
+            user.Introduction = value.Introduction;
+            user.BackgroundPhoto = value.BackgroundPhoto;
+            user.Picture = value.Picture;
+            user.UpdatedAt = DateTime.Now;
+
+            try
+            {
+                // 樂觀併發:
+                _dbContext.Entry(user).State = EntityState.Modified;
+                _dbContext.SaveChanges();
+
+                return Ok(new
+                {
+                    StatusCode = 200,
+                    title = "修改成功"
+                });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // 若同步修改失敗
+                if (!_dbContext.Users.Any(u => u.Address == address))
+                {
+                    return NotFound(new
+                    {
+                        StatusCode = 404,
+                        title = "同步修改失敗"
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, "存取發生錯誤");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 使用者註冊
         /// </summary>
         [HttpPost("/user/register")]
         [Produces("application/json")]
@@ -68,7 +227,7 @@ namespace DotnetWebApi.Controllers
         }
 
         /// <summary>
-        /// 確認電子郵件是否使用過
+        /// 確認電子郵件是否使用過-註冊
         /// </summary>
         /// <param name="email" example="andy910812@gmail.com">會員Email</param>
         /// <returns></returns>
@@ -155,7 +314,7 @@ namespace DotnetWebApi.Controllers
 
 
         /// <summary>
-        /// 確認使用者名稱是否使用過
+        /// 確認使用者名稱是否使用過-註冊
         /// </summary>
         /// <param name="name" example="Andy">會員名稱</param>
         /// <returns></returns>
