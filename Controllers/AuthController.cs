@@ -1,7 +1,4 @@
 using System.Dynamic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Text.RegularExpressions;
 using DotnetWebApi.Dto;
 using DotnetWebApi.HandleFunction;
@@ -9,10 +6,7 @@ using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Signer;
-using Nethereum.Web3;
+
 
 namespace DotnetWebApi.Controllers
 {
@@ -23,16 +17,19 @@ namespace DotnetWebApi.Controllers
         private readonly BlogContext _dbContext;
         private readonly IMailService _mailService;
         private readonly IConfiguration _configuration;
+        private readonly JwtHelper _jwthelper;
 
-        public AuthController(BlogContext dbContext, IMailService mailService, IConfiguration configuration)
+        public AuthController(BlogContext dbContext, IMailService mailService, IConfiguration configuration, JwtHelper jwthelper)
         {
             _dbContext = dbContext;
             _mailService = mailService;
             _configuration = configuration;
+            _jwthelper = jwthelper;
         }
 
+
         /// <summary>
-        /// 登入拿TOKEN
+        /// 登入驗證
         /// </summary>
         [HttpPost("/auth/login")]
         [Produces("application/json")]
@@ -55,7 +52,7 @@ namespace DotnetWebApi.Controllers
             }
             else if (AuthHandle.VerifySignature(userETF.Nonce, value.address, value.signature))
             {
-                var token = AuthHandle.jwtLogin(userETF.Name, userETF.Email, userETF.Address, _configuration["JWT:KEY"], _configuration["JWT:Issuer"], _configuration["JWT:Audience"]);
+                var token = _jwthelper.GenerateToken(value.address, 120, value.admin);
                 return Ok(new
                 {
                     StatusCode = 200,
@@ -71,7 +68,7 @@ namespace DotnetWebApi.Controllers
         }
 
         /// <summary>
-        /// 確認是否是會員
+        /// 確認是否為使用者
         /// </summary>
         /// <param name="address" example="0x34B605B3d13923a60a629794C15B103C44beaE1c">會員錢包地址</param>
         /// <returns></returns>
@@ -82,16 +79,6 @@ namespace DotnetWebApi.Controllers
         [ProducesResponseType(typeof(IsUserDto404), StatusCodes.Status404NotFound)]
         public ActionResult IsUser(string address)
         {
-            if (address.Length != 42)
-            {
-                return BadRequest(new
-                {
-                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
-                    title = "One or more validation errors occurred.",
-                    status = 400,
-                    errors = new { address = new[] { "address必須等於42個字元" } }
-                });
-            }
             var userETF = (from x in _dbContext.Users
                            where x.Address == address
                            select x).FirstOrDefault();
