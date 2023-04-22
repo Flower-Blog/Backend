@@ -11,8 +11,7 @@ namespace DotnetWebApi.Dto
         public string address { get; set; }
         /// <example>0xee285f7ee0d69071cb1ca4a8f92013d47164393ee8c2337bd1e5b5cf5e476232709e5d32932fe5f5749a5d41f518cd50bd1dd7dd967c8355c8666b39b93033fb1c</example>
         public string signature { get; set; }
-        /// <example>false</example>
-        public bool admin { get; set; }
+        
     }
     public class LoginDto200
     {
