@@ -210,7 +210,7 @@ namespace DotnetWebApi.Controllers
                     Address = value.Address,
                     Email = value.Email,
                     Nonce = Guid.NewGuid().ToString(),
-                    Admin = false
+                    Admin = value.admin
                 });
                 _dbContext.SaveChanges();
 
