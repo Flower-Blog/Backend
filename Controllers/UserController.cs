@@ -70,9 +70,9 @@ namespace DotnetWebApi.Controllers
         /// 獲取特定使用者資料
         /// </summary>
         [HttpGet("/user/{username}")]
-        [ProducesResponseType(typeof(GetCreaterData200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetCreaterData404), StatusCodes.Status404NotFound)]
-        public ActionResult GetCreaterData(string username)
+        [ProducesResponseType(typeof(GetCreaterDataDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetCreaterDataDto404), StatusCodes.Status404NotFound)]
+        public ActionResult GetCreaterDataDto(string username)
         {
             var userdata = (from a in _dbContext.Users
                             where a.Name == username
@@ -107,12 +107,12 @@ namespace DotnetWebApi.Controllers
         /// </summary>
         [HttpPatch("/user/{address}")]
         [Authorize(Roles = "user,admin")]
-        [ProducesResponseType(typeof(EditUserData200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(EditUserData400), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(EditUserData401), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(EditUserData404), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(EditUserData500), StatusCodes.Status500InternalServerError)]
-        public ActionResult EditUserData(string address, [FromBody] EditUserData value)
+        [ProducesResponseType(typeof(EditUserDataDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(EditUserDataDto400), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(EditUserDataDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(EditUserDataDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(EditUserDataDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult EditUserDataDto(string address, [FromBody] EditUserDataDto value)
         {
             // 拿取 
             var authHeader = HttpContext.Request.Headers["Authorization"];

@@ -22,7 +22,82 @@ namespace DotnetWebApi.Controllers
             _mailService = mailService;
         }
 
+        /// <summary>
+        /// 取得所有文章
+        /// </summary>
+        [HttpGet("/articles")]
+        [ProducesResponseType(typeof(GetAllArticlesDto200), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(GetAllArticlesDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GetAllArticles()
+        {
+            try
+            {
+                // 拿取所有文章
+                var articles = _dbContext.Articles
+                                         .Include(a => a.User)
+                                         .Where(a => a.State == true)
+                                         .Select(a => new GetAllArticlesDto
+                                         {
+                                             Id = a.Id,
+                                             address = a.User.Address,
+                                             Title = a.Title,
+                                             SubStandard = a.SubStandard,
+                                             Contents = a.Contents
+                                         });
+                return Ok(new { StatusCode = 200, articles });
+            }
+            catch
+            {
+                return StatusCode(500, "取得所有文章失敗");
+            }
+        }
 
+        /// <summary>
+        /// 新增個人文章
+        /// </summary>
+        [HttpPost("/articles")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(EditUserDataDto200), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(EditUserDataDto400), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(EditUserDataDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(EditUserDataDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(EditUserDataDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult AddArticle([FromBody] AddArticleDto value)
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
+
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            // 從user資料表找user id
+            int userId = (from a in _dbContext.Users
+                          where a.Address == userAddress
+                          select a.Id).FirstOrDefault();
+
+            _dbContext.Articles.Add(new Article
+            {
+                UserId = userId,
+                Title = value.Title,
+                SubStandard = value.SubStandard,
+                Contents = value.Contents,
+                State = true
+            });
+            _dbContext.SaveChanges();
+            // FIXME: 等搜尋單篇文章出現記得修改 還有該死的DTO註解
+            // return CreatedAtAction("IsUser", "Auth", new { address = value.Address }, value);
+            return Ok();
+        }
 
     }
 }
