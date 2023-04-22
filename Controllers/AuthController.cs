@@ -52,7 +52,7 @@ namespace DotnetWebApi.Controllers
             }
             else if (AuthHandle.VerifySignature(userETF.Nonce, value.address, value.signature))
             {
-                var token = _jwthelper.GenerateToken(value.address, 120, value.admin);
+                var token = _jwthelper.GenerateToken(value.address, 120, userETF.Admin);
                 return Ok(new
                 {
                     StatusCode = 200,
