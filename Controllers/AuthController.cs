@@ -79,6 +79,16 @@ namespace DotnetWebApi.Controllers
         [ProducesResponseType(typeof(IsUserDto404), StatusCodes.Status404NotFound)]
         public ActionResult IsUser(string address)
         {
+            if (address.Length != 42)
+            {
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = new { address = new[] { "address必須等於42個字元" } }
+                });
+            }
             var userETF = (from x in _dbContext.Users
                            where x.Address == address
                            select x).FirstOrDefault();
