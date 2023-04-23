@@ -3,7 +3,7 @@ using DotnetWebApi.Models;
 
 namespace DotnetWebApi.Dto
 {
-    public class GetAllArticlesDto
+    public class GetArticleDto
     {
         /// <example>1</example>
         public int Id { get; set; }
@@ -20,38 +20,31 @@ namespace DotnetWebApi.Dto
         /// <exaple>2023-04-22T20:49:32.71</exaple>
         public DateTime UpdatedAt { get; set; }
     }
-    public class GetAllArticlesDto200
+    public class GetArticleDto200
     {
         /// <example>200</example>
         public string StatusCode { get; set; }
         /// <example>
-        /// [
-        ///     {
-        ///         "id": 2,
-        ///         "address": "0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089",
-        ///         "title": "一些後勁蠻強的短篇冷笑話",
-        ///         "subStandard": "test",
-        ///         "contents": "string",
-        ///         "createdAt": "2023-04-22T20:49:32.71",
-        ///         "updatedAt": "2023-04-22T20:49:32.71"
-        ///     },
-        ///     {
-        ///         "id": 4,
-        ///         "address": "0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089",
-        ///         "title": "一些後勁蠻強的短篇冷笑話",
-        ///         "subStandard": "哈哈",
-        ///         "contents": "string",
-        ///         "createdAt": "2023-04-22T20:49:32.71",
-        ///         "updatedAt": "2023-04-22T20:49:32.71"
-        ///     }
-        /// ]
+        /// {
+        ///     "id": 2,
+        ///     "address": "0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089",
+        ///     "title": "一些後勁蠻強的短篇冷笑話",
+        ///     "subStandard": "test",
+        ///     "contents": "string",
+        ///     "createdAt": "2023-04-22T20:49:32.71",
+        ///     "updatedAt": "2023-04-22T20:49:32.71"
+        /// }
         /// </example>
-        public object[] articles { get; set; }
-
-
-
+        public object articles { get; set; }
     }
-    public class GetAllArticlesDto500
+    public class GetArticleDto404
+    {
+        /// <example>404</example>
+        public string StatusCode { get; set; }
+        /// <example>找不到文章</example>
+        public string title { get; set; }
+    }
+    public class GetArticleDto500
     {
         /// <example>500</example>
         public string StatusCode { get; set; }
