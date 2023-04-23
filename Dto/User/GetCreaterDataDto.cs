@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DotnetWebApi.Dto
 {
-    public class GetCreaterData
+    public class GetCreaterDataDto
     {
         /// <example>1</example>
         public int Id { get; set; }
@@ -19,7 +19,7 @@ namespace DotnetWebApi.Dto
         /// <example>https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Code.org_logo.svg/1200px-Code.org_logo.svg.png</example>
         public string Picture { get; set; }
     }
-    public class GetCreaterData200
+    public class GetCreaterDataDto200
     {
         /// <example>200</example>
         public string StatusCode { get; set; }
@@ -38,7 +38,7 @@ namespace DotnetWebApi.Dto
         /// <example>https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Code.org_logo.svg/1200px-Code.org_logo.svg.png</example>
         public string Picture { get; set; }
     }
-    public class GetCreaterData404
+    public class GetCreaterDataDto404
     {
         /// <example>404</example>
         public string StatusCode { get; set; }
