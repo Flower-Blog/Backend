@@ -10,8 +10,8 @@ namespace DotnetWebApi.HandleFunction
     {
         public string GetFilePath(string username, bool BackgroundPhoto)
         {
-            if (BackgroundPhoto) return ".\\wwwroot\\BackgroundPhoto\\" + username;
-            return ".\\wwwroot\\Picture\\" + username;
+            if (BackgroundPhoto) return "wwwroot//BackgroundPhoto//" + username;
+            return "wwwroot//Picture//" + username;
         }
     }
 }

@@ -171,7 +171,7 @@ namespace DotnetWebApi.Controllers
 
                 foreach (IFormFile source in _uploadedfiles)
                 {
-                    string Filepath = test.GetFilePath(userAddress, BackgroundPhoto);
+                    string Filepath = test.GetFilePath(user.Address, BackgroundPhoto);
 
                     if (!System.IO.Directory.Exists(Filepath))
                     {
@@ -179,7 +179,7 @@ namespace DotnetWebApi.Controllers
                     }
                     string FileType = Path.GetExtension(source.FileName).Substring(1);
 
-                    string imagepath = Filepath + $"\\image.{FileType}";
+                    string imagepath = Filepath + $"//image.{FileType}";
 
                     if (System.IO.File.Exists(imagepath))
                     {
