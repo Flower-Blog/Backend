@@ -8,7 +8,6 @@ services:
     environment:
       SA_PASSWORD: ${DB_PASSWORD}
       ACCEPT_EULA: "Y"
-      TZ: "Asia/Taipei"
   adminer:
     image: adminer
     ports:

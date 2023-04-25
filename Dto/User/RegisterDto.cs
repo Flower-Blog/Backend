@@ -13,8 +13,6 @@ namespace DotnetWebApi.Dto
         /// <example>andy910812@gmail.com</example>
         [EmailAddress(ErrorMessage = "email格式不正確")]
         public string Email { get; set; }
-        /// <example>false</example>
-        public bool admin { get; set; }
     }
     public class RegisterDto201
     {
@@ -29,8 +27,6 @@ namespace DotnetWebApi.Dto
         public string Address { get; set; }
         /// <example>andy910812@gmail.com</example>
         public string Email { get; set; }
-        /// <example>false</example>
-        public bool admin { get; set; }
     }
     public class RegisterDto400
     {
