@@ -40,6 +40,18 @@ namespace DotnetWebApi.Dto
         /// <example>同步修改失敗</example>
         public string title { get; set; }
     }
+    public class EditUserDataDto409
+    {
+        /// <example>409</example>
+        public string StatusCode { get; set; }
+
+        /// <example>有資料被使用過了 拒絕註冊</example>
+        public string Title { get; set; }
+        /// <example>信箱被使用過</example>
+        public string Email { get; set; }
+        /// <example>名稱被使用過</example>
+        public string Name { get; set; }
+    }
     public class EditUserDataDto500
     {
         /// <example>500</example>

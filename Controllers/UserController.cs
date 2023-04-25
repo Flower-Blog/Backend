@@ -114,6 +114,7 @@ namespace DotnetWebApi.Controllers
         [ProducesResponseType(typeof(EditUserDataDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(EditUserDataDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(EditUserDataDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(EditUserDataDto409), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(EditUserDataDto500), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> EditUserDataDtoAsync(string address, [FromForm] EditUserDataDto value)
         {
@@ -141,6 +142,23 @@ namespace DotnetWebApi.Controllers
                     StatusCode = 400,
                     title = "這不是你的帳號歐"
                 });
+            }
+
+            var EmailUse = (from x in _dbContext.Users
+                            where x.Email == value.Email && x.Address != userAddress
+                            select x).FirstOrDefault();
+            var NameUse = (from x in _dbContext.Users
+                           where x.Name == value.Name && x.Address != userAddress
+                           select x).FirstOrDefault();
+
+            if (EmailUse != null || NameUse != null)
+            {
+                dynamic response = new ExpandoObject();
+                response.StatusCode = 409;
+                response.Title = "有資料被使用過了 拒絕註冊";
+                if (EmailUse != null) response.Email = "信箱被使用過";
+                if (NameUse != null) response.Name = "名稱被使用過";
+                return Conflict(response);
             }
 
             var user = _dbContext.Users.SingleOrDefault(u => u.Address == address);
@@ -186,6 +204,9 @@ namespace DotnetWebApi.Controllers
             user.BackgroundPhoto = $"https://{_config["IP"]}:3000/BackgroundPhoto/{userAddress}/image.png";
             user.Picture = $"https://{_config["IP"]}:3000/Picture/{userAddress}/image.png";
             user.UpdatedAt = DateTime.Now;
+
+
+
 
             try
             {
