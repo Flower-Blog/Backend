@@ -46,20 +46,20 @@ builder.Services
   .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   .AddJwtBearer(options =>
   {
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        // 可以讓[Authorize]判斷角色
-        RoleClaimType = "roles",
-        // 預設會認證發行人
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JwtSettings_Issuer"],
-        // 不認證使用者
-        ValidateAudience = false,
-        // 如果 Token 中包含 key 才需要驗證，一般都只有簽章而已
-        ValidateIssuerSigningKey = true,
-        // 簽章所使用的key
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings_SignKey"]))
-    };
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+          // 可以讓[Authorize]判斷角色
+          RoleClaimType = "roles",
+          // 預設會認證發行人
+          ValidateIssuer = true,
+          ValidIssuer = builder.Configuration["JwtSettings_Issuer"],
+          // 不認證使用者
+          ValidateAudience = false,
+          // 如果 Token 中包含 key 才需要驗證，一般都只有簽章而已
+          ValidateIssuerSigningKey = true,
+          // 簽章所使用的key
+          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings_SignKey"]))
+      };
   });
 #endregion
 
@@ -93,6 +93,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 // 驗證

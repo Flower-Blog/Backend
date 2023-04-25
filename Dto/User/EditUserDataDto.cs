@@ -10,10 +10,10 @@ namespace DotnetWebApi.Dto
         public string Email { get; set; }
         /// <example>自我介紹</example>
         public string Introduction { get; set; }
-        /// <example>https://png.pngtree.com/thumb_back/fh260/background/20201208/pngtree-beautiful-purple-blooming-christmas-snowflake-image_503982.jpg</example>
-        public string BackgroundPhoto { get; set; }
-        /// <example>https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Code.org_logo.svg/1200px-Code.org_logo.svg.png</example>
-        public string Picture { get; set; }
+
+        public IFormFile BackgroundPhoto { get; set; }
+
+        public IFormFile Picture { get; set; }
     }
     public class EditUserDataDto200
     {

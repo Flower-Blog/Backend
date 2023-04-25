@@ -2,6 +2,7 @@ using System.Dynamic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.RegularExpressions;
 using DotnetWebApi.Dto;
+using DotnetWebApi.HandleFunction;
 using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -16,10 +17,12 @@ namespace DotnetWebApi.Controllers
     {
         private readonly BlogContext _dbContext;
         private readonly IMailService _mailService;
-        public UserController(BlogContext dbContext, IMailService mailService)
+        private readonly IConfiguration _config;
+        public UserController(BlogContext dbContext, IMailService mailService, IConfiguration config)
         {
             _dbContext = dbContext;
             _mailService = mailService;
+            _config = config;
         }
 
         /// <summary>
@@ -112,7 +115,7 @@ namespace DotnetWebApi.Controllers
         [ProducesResponseType(typeof(EditUserDataDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(EditUserDataDto404), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(EditUserDataDto500), StatusCodes.Status500InternalServerError)]
-        public ActionResult EditUserDataDto(string address, [FromBody] EditUserDataDto value)
+        public async Task<ActionResult> EditUserDataDtoAsync(string address, [FromForm] EditUserDataDto value)
         {
             // 拿取 
             var authHeader = HttpContext.Request.Headers["Authorization"];
@@ -139,14 +142,49 @@ namespace DotnetWebApi.Controllers
                     title = "這不是你的帳號歐"
                 });
             }
+
             var user = _dbContext.Users.SingleOrDefault(u => u.Address == address);
+
+            try
+            {
+                var _uploadedfiles = Request.Form.Files;
+                UserHandle test = new UserHandle();
+                bool BackgroundPhoto = true;
+
+                foreach (IFormFile source in _uploadedfiles)
+                {
+                    string Filepath = test.GetFilePath(userAddress, BackgroundPhoto);
+
+                    if (!System.IO.Directory.Exists(Filepath))
+                    {
+                        System.IO.Directory.CreateDirectory(Filepath);
+                    }
+                    string FileType = Path.GetExtension(source.FileName).Substring(1);
+
+                    string imagepath = Filepath + $"\\image.{FileType}";
+
+                    if (System.IO.File.Exists(imagepath))
+                    {
+                        System.IO.File.Delete(imagepath);
+                    }
+                    using (FileStream stream = System.IO.File.Create(imagepath))
+                    {
+                        await source.CopyToAsync(stream);
+                    }
+                    BackgroundPhoto = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { StatusCode = 400, title = "上傳檔案出錯了", error = ex });
+            }
 
             // 更新使用者資料
             user.Name = value.Name;
             user.Email = value.Email;
             user.Introduction = value.Introduction;
-            user.BackgroundPhoto = value.BackgroundPhoto;
-            user.Picture = value.Picture;
+            user.BackgroundPhoto = $"https://{_config["IP"]}:3000/BackgroundPhoto/{userAddress}/image.png";
+            user.Picture = $"https://{_config["IP"]}:3000/Picture/{userAddress}/image.png";
             user.UpdatedAt = DateTime.Now;
 
             try
@@ -209,6 +247,8 @@ namespace DotnetWebApi.Controllers
                     Name = value.Name,
                     Address = value.Address,
                     Email = value.Email,
+                    BackgroundPhoto = $"https://{_config["IP"]}:3000/BackgroundPhoto/Unknow.png",
+                    Picture = $"https://{_config["IP"]}:3000/Picture/Unknow.png",
                     Nonce = Guid.NewGuid().ToString(),
                     Admin = value.admin
                 });
