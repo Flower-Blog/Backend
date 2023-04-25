@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DotnetWebApi.Models;
 
-public partial class FlowerOwnership
+public partial class FlowerOwnerhip
 {
     public int Id { get; set; }
 

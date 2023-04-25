@@ -12,16 +12,16 @@ namespace DotnetWebApi.Helper
 {
     public class MailService : IMailService
     {
-        private readonly IConfiguration _config;
-        public MailService(IConfiguration config)
+        private readonly MailSettings _mailSettings;
+        public MailService(IOptions<MailSettings> mailSettings)
         {
-            _config = config;
+            _mailSettings = mailSettings.Value;
         }
         public async Task SendEmailiAsync(MailRequest mailRequest)
         {
             // 寄/發送人的資訊
             var email = new MimeMessage();
-            email.Sender = MailboxAddress.Parse(_config["MailSettings_Mail"]);
+            email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
             email.To.Add(MailboxAddress.Parse(mailRequest.ToEmail));
             // 主題
             email.Subject = mailRequest.Subject;
@@ -50,8 +50,8 @@ namespace DotnetWebApi.Helper
             //=============================================================
             //smtp的寄送方式(使用appsetting.json的資訊)
             using var smtp = new SmtpClient();
-            smtp.Connect(_config["MailSettings_Host"], int.Parse(_config["MailSettings_Port"]), SecureSocketOptions.StartTls);
-            smtp.Authenticate(_config["MailSettings_Mail"], _config["MailSettings_Password"]);
+            smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
+            smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
             await smtp.SendAsync(email);
             smtp.Disconnect(true);
         }

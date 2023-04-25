@@ -1,8 +1,5 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[csharp]": {
-    "editor.defaultFormatter": "ms-dotnettools.csharp"
-  },
+  "editor.defaultFormatter": "kreativ-software.csharpextensions",
   "editor.formatOnSave": true,
   "files.autoSaveDelay": 1000,
   "C_Cpp.errorSquiggles": "disabled"

@@ -1,4 +1,7 @@
 using System.Dynamic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 using DotnetWebApi.Dto;
 using DotnetWebApi.HandleFunction;
@@ -6,7 +9,10 @@ using DotnetWebApi.Helper;
 using DotnetWebApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.IdentityModel.Tokens;
+using Nethereum.Hex.HexConvertors.Extensions;
+using Nethereum.Signer;
+using Nethereum.Web3;
 
 namespace DotnetWebApi.Controllers
 {
@@ -17,19 +23,16 @@ namespace DotnetWebApi.Controllers
         private readonly BlogContext _dbContext;
         private readonly IMailService _mailService;
         private readonly IConfiguration _configuration;
-        private readonly JwtHelper _jwthelper;
 
-        public AuthController(BlogContext dbContext, IMailService mailService, IConfiguration configuration, JwtHelper jwthelper)
+        public AuthController(BlogContext dbContext, IMailService mailService, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _mailService = mailService;
             _configuration = configuration;
-            _jwthelper = jwthelper;
         }
 
-
         /// <summary>
-        /// 登入驗證
+        /// 登入拿TOKEN
         /// </summary>
         [HttpPost("/auth/login")]
         [Produces("application/json")]
@@ -52,7 +55,7 @@ namespace DotnetWebApi.Controllers
             }
             else if (AuthHandle.VerifySignature(userETF.Nonce, value.address, value.signature))
             {
-                var token = _jwthelper.GenerateToken(value.address, 120, userETF.Admin);
+                var token = AuthHandle.jwtLogin(userETF.Name, userETF.Email, userETF.Address, _configuration["JWT:KEY"], _configuration["JWT:Issuer"], _configuration["JWT:Audience"]);
                 return Ok(new
                 {
                     StatusCode = 200,
@@ -68,7 +71,7 @@ namespace DotnetWebApi.Controllers
         }
 
         /// <summary>
-        /// 確認是否為使用者
+        /// 確認是否是會員
         /// </summary>
         /// <param name="address" example="0x34B605B3d13923a60a629794C15B103C44beaE1c">會員錢包地址</param>
         /// <returns></returns>
