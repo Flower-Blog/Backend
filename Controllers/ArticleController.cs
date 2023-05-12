@@ -21,79 +21,6 @@ namespace DotnetWebApi.Controllers
             _dbContext = dbContext;
             _mailService = mailService;
         }
-
-        /// <summary>
-        /// 取得所有文章(最新)
-        /// </summary>
-        [HttpGet("/articles")]
-        [ProducesResponseType(typeof(GetAllArticlesDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetAllArticlesDto500), StatusCodes.Status500InternalServerError)]
-        public ActionResult GetAllArticles()
-        {
-            try
-            {
-                // 拿取所有文章
-                var articles = _dbContext.Articles
-                                         .Include(a => a.User)
-                                         .Where(a => a.State == true)
-                                         .Select(a => new GetAllArticlesDto
-                                         {
-                                             Id = a.Id,
-                                             address = a.User.Address,
-                                             Title = a.Title,
-                                             SubStandard = a.SubStandard,
-                                             Contents = a.Contents,
-                                             CreatedAt = a.CreatedAt,
-                                             UpdatedAt = a.UpdatedAt
-                                         })
-                                         .OrderByDescending(a => a.CreatedAt)
-                                         .ToList();
-                return Ok(new { StatusCode = 200, articles });
-            }
-            catch
-            {
-                return StatusCode(500, "取得所有文章失敗");
-            }
-        }
-
-        /// <summary>
-        /// 取得單一文章
-        /// </summary>
-        /// <param name="id" example="2">文章編號</param>
-        /// <returns></returns>
-        [HttpGet("/articles/{id}")]
-        [ProducesResponseType(typeof(GetArticleDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetArticleDto404), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(GetArticleDto500), StatusCodes.Status500InternalServerError)]
-        public ActionResult GetArticle(int id)
-        {
-            try
-            {
-                // 拿取單一文章
-                var articles = (_dbContext.Articles
-                                         .Include(a => a.User)
-                                         .Where(a => a.State == true && a.Id == id)
-                                         .Select(a => new GetAllArticlesDto
-                                         {
-                                             Id = a.Id,
-                                             address = a.User.Address,
-                                             Title = a.Title,
-                                             SubStandard = a.SubStandard,
-                                             Contents = a.Contents,
-                                             CreatedAt = a.CreatedAt,
-                                             UpdatedAt = a.UpdatedAt
-                                         })).FirstOrDefault();
-                if (articles != null)
-                    return Ok(new { StatusCode = 200, articles });
-                else
-                    return NotFound(new { StatusCode = 404, title = "找不到文章" });
-            }
-            catch
-            {
-                return StatusCode(500, "取得所有文章失敗");
-            }
-        }
-
         /// <summary>
         /// 新增個人文章
         /// </summary>
@@ -147,27 +74,63 @@ namespace DotnetWebApi.Controllers
         }
 
         /// <summary>
+        /// 取得所有文章(最新)
+        /// </summary>
+        [HttpGet("/articles")]
+        [ProducesResponseType(typeof(GetAllArticlesDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetAllArticlesDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GetAllArticles()
+        {
+            try
+            {
+                // 拿取所有文章
+                var articles = _dbContext.Articles
+                                         .Include(a => a.User)
+                                         .Where(a => a.State == true)
+                                         .Select(a => new GetAllArticlesDto
+                                         {
+                                             Id = a.Id,
+                                             Title = a.Title,
+                                             SubStandard = a.SubStandard,
+                                             Contents = a.Contents,
+                                             CreatedAt = a.CreatedAt,
+                                             UpdatedAt = a.UpdatedAt,
+                                             userdata = new UserData
+                                             {
+                                                 Name = a.User.Name
+                                             },
+                                         })
+                                         .OrderByDescending(a => a.CreatedAt)
+                                         .Take(10)
+                                         .ToList();
+                return Ok(new { StatusCode = 200, articles });
+            }
+            catch
+            {
+                return StatusCode(500, "取得所有文章失敗");
+            }
+        }
+
+        /// <summary>
         /// 取得個人所有文章(最新)
         /// </summary>
-        /// <param name="address" example="2">錢包地址</param>
+        /// <param name="address" example="0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089">錢包地址</param>
         /// <returns></returns>
         [HttpGet("/articles/user/{address}")]
-        [ProducesResponseType(typeof(GetArticleDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetArticleDto404), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(GetArticleDto500), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(GetUserArticlesDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserArticlesDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(GetUserArticlesDto500), StatusCodes.Status500InternalServerError)]
         public ActionResult GetUserArticles(string address)
         {
             try
             {
                 // 拿取單一文章
                 var articles = (_dbContext.Articles
-
                                           .Include(a => a.User)
                                           .Where(a => a.State == true && a.User.Address == address)
-                                          .Select(a => new GetAllArticlesDto
+                                          .Select(a => new GetUserArticlesDto
                                           {
                                               Id = a.Id,
-                                              address = a.User.Address,
                                               Title = a.Title,
                                               SubStandard = a.SubStandard,
                                               Contents = a.Contents,
@@ -175,6 +138,7 @@ namespace DotnetWebApi.Controllers
                                               UpdatedAt = a.UpdatedAt
                                           }))
                                           .OrderByDescending(a => a.CreatedAt)
+                                          .Take(10)
                                           .ToList();
                 if (articles.Count != 0)
                     return Ok(new { StatusCode = 200, articles });
@@ -183,8 +147,187 @@ namespace DotnetWebApi.Controllers
             }
             catch
             {
-                return StatusCode(500, "取得所有文章失敗");
+                return StatusCode(500, "取得個人所有文章");
             }
+        }
+
+        /// <summary>
+        /// 取得單一文章
+        /// </summary>
+        /// <param name="id" example="2">文章編號</param>
+        /// <returns></returns>
+        [HttpGet("/articles/{id}")]
+        [ProducesResponseType(typeof(GetArticleDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetArticleDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(GetArticleDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GetArticle(int id)
+        {
+            try
+            {
+                // 拿取單一文章
+                var article = (_dbContext.Articles
+                                         .Include(a => a.User)
+                                         .Where(a => a.State == true && a.Id == id)
+                                         .Select(a => new GetArticleDto
+                                         {
+                                             Id = a.Id,
+                                             Title = a.Title,
+                                             SubStandard = a.SubStandard,
+                                             Contents = a.Contents,
+                                             CreatedAt = a.CreatedAt,
+                                             UpdatedAt = a.UpdatedAt
+                                         })).FirstOrDefault();
+                if (article != null)
+                    return Ok(new { StatusCode = 200, article });
+                else
+                    return NotFound(new { StatusCode = 404, title = "找不到文章" });
+            }
+            catch
+            {
+                return StatusCode(500, "取得單一文章");
+            }
+        }
+
+
+
+        /// <summary>
+        /// 編輯個人文章
+        /// </summary>
+        /// <param name="id" example="2">文章編號</param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        [HttpPatch("/articles/{id}")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(EditArticleDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(EditArticleDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(EditArticleDto403), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(EditArticleDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(EditArticleDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult EditArticle(int id, [FromBody] EditArticleDto value)
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
+
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            var article = _dbContext.Articles.SingleOrDefault(u => u.Id == id);
+            if (article == null)
+                return NotFound(new { StatusCode = 404, title = "找不到文章" });
+            var user = _dbContext.Users.SingleOrDefault(u => u.Address == userAddress);
+
+            if (article.UserId != user.Id)
+                return new ObjectResult(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "你不是這邊文章的作者",
+                    status = 403,
+                })
+                {
+                    StatusCode = 403
+                };
+
+            article.Title = value.Title;
+            article.SubStandard = value.SubStandard;
+            article.Contents = value.Contents;
+            article.UpdatedAt = DateTime.Now;
+            try
+            {
+                // 樂觀併發:
+                _dbContext.Entry(article).State = EntityState.Modified;
+                _dbContext.SaveChanges();
+
+                return Ok(new
+                {
+                    StatusCode = 200,
+                    title = "修改成功"
+                });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // 若同步修改失敗
+                if (!_dbContext.Users.Any(u => u.Address == userAddress))
+                {
+                    return NotFound(new
+                    {
+                        StatusCode = 404,
+                        title = "同步修改失敗"
+                    });
+                }
+                else
+                {
+                    return StatusCode(500, "存取發生錯誤");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 刪除個人文章
+        /// </summary>
+        /// <param name="id" example="2">文章編號</param>
+        /// <returns></returns>
+        [HttpDelete("/articles/{id}")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(DeleteArticleDto204), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(DeleteArticleDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(DeleteArticleDto403), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(DeleteArticleDto404), StatusCodes.Status404NotFound)]
+        public IActionResult DeleteArticle(int id)
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
+
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            var user = _dbContext.Users.SingleOrDefault(u => u.Address == userAddress);
+
+            var article = _dbContext.Articles.SingleOrDefault(u => u.Id == id);
+            if (article == null)
+                return NotFound(new { StatusCode = 404, title = "找不到文章" });
+
+            if (article.UserId != user.Id)
+                return new ObjectResult(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "你不是這邊文章的作者",
+                    status = 403,
+                })
+                {
+                    StatusCode = 403
+                };
+
+            _dbContext.Articles.Remove(article);
+            _dbContext.SaveChanges();
+
+            return new ObjectResult(new
+            {
+                title = "刪除成功",
+                status = 204,
+            })
+            {
+                StatusCode = 204
+            };
         }
     }
 }

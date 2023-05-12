@@ -108,7 +108,7 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 編輯自身使用者資料
         /// </summary>
-        [HttpPatch("/user/{address}")]
+        [HttpPatch("/user")]
         [Authorize(Roles = "user,admin")]
         [ProducesResponseType(typeof(EditUserDataDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(EditUserDataDto400), StatusCodes.Status400BadRequest)]
@@ -116,7 +116,7 @@ namespace DotnetWebApi.Controllers
         [ProducesResponseType(typeof(EditUserDataDto404), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(EditUserDataDto409), StatusCodes.Status409Conflict)]
         [ProducesResponseType(typeof(EditUserDataDto500), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> EditUserDataDtoAsync(string address, [FromForm] EditUserDataDto value)
+        public async Task<ActionResult> EditUserDataDtoAsync([FromForm] EditUserDataDto value)
         {
             // 拿取 
             var authHeader = HttpContext.Request.Headers["Authorization"];
@@ -133,16 +133,6 @@ namespace DotnetWebApi.Controllers
 
             // 從 payload 拿取address
             string userAddress = (string)payload["address"];
-
-            // 不是找改自己的資料
-            if (userAddress != address)
-            {
-                return BadRequest(new
-                {
-                    StatusCode = 400,
-                    title = "這不是你的帳號歐"
-                });
-            }
 
             var EmailUse = (from x in _dbContext.Users
                             where x.Email == value.Email && x.Address != userAddress
@@ -161,7 +151,7 @@ namespace DotnetWebApi.Controllers
                 return Conflict(response);
             }
 
-            var user = _dbContext.Users.SingleOrDefault(u => u.Address == address);
+            var user = _dbContext.Users.SingleOrDefault(u => u.Address == userAddress);
 
             try
             {
@@ -206,8 +196,6 @@ namespace DotnetWebApi.Controllers
             user.UpdatedAt = DateTime.Now;
 
 
-
-
             try
             {
                 // 樂觀併發:
@@ -223,7 +211,7 @@ namespace DotnetWebApi.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 // 若同步修改失敗
-                if (!_dbContext.Users.Any(u => u.Address == address))
+                if (!_dbContext.Users.Any(u => u.Address == userAddress))
                 {
                     return NotFound(new
                     {
