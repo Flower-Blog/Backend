@@ -9,6 +9,8 @@ services:
       SA_PASSWORD: ${DB_PASSWORD}
       ACCEPT_EULA: "Y"
       TZ: "Asia/Taipei"
+    volumes:
+      - ./mssql.sh:/docker-entrypoint-initdb.d/mssql.sh
   adminer:
     image: adminer
     ports:
