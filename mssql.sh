@@ -164,16 +164,16 @@ INSERT INTO Flowers
 VALUES('桃花','愛情、美麗、純真、浪漫、喜悅、甜蜜、吉祥、和諧、幸福、恩愛');
 
 INSERT INTO FlowerOwnership
-VALUES('0',0,0,0);
+VALUES(1,1,0);
 
 INSERT INTO FlowerOwnership
-VALUES('1',0,1,0);
+VALUES(1,2,0);
 
 INSERT INTO FlowerOwnership
-VALUES('2',0,2,0);
+VALUES(1,3,0);
 
 INSERT INTO FlowerOwnership
-VALUES('3',0,3,0);
+VALUES(1,4,0);
 
 INSERT INTO FlowerOwnership
-VALUES('4',0,4,0);
+VALUES(1,5,0);
