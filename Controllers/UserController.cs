@@ -472,8 +472,8 @@ namespace DotnetWebApi.Controllers
         /// </summary>
         [HttpGet("/user/flower")]
         [Authorize(Roles = "user,admin")]
-        [ProducesResponseType(typeof(GetUserDataDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetUserDataDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(GetMyFlowerDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetMyFlowerDto401), StatusCodes.Status401Unauthorized)]
         public ActionResult GetMyFlower()
         {
             // 拿取 
@@ -516,8 +516,8 @@ namespace DotnetWebApi.Controllers
         /// 創作者收藏花
         /// </summary>
         [HttpGet("/user/flower/{name}")]
-        [ProducesResponseType(typeof(GetUserDataDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetUserDataDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(GetUserFlowerDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserFlowerDto401), StatusCodes.Status401Unauthorized)]
         public ActionResult GetUserFlower(string name)
         {
             // 從user資料表找user id

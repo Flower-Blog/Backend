@@ -13,6 +13,8 @@ namespace DotnetWebApi.Dto
         public string SubStandard { get; set; }
         /// <exaple>簡潔的內容</exaple>
         public string Contents { get; set; }
+        /// <exaple>27</exaple>
+        public int FlowerCount { get; set; }
         /// <exaple>2023-04-22T20:49:32.71</exaple>
         public DateTime CreatedAt { get; set; }
         /// <exaple>2023-04-22T20:49:32.71</exaple>
@@ -30,7 +32,8 @@ namespace DotnetWebApi.Dto
         ///         "subStandard": "test",
         ///         "contents": "string",
         ///         "createdAt": "2023-04-22T20:49:32.71",
-        ///         "updatedAt": "2023-04-22T20:49:32.71"
+        ///         "updatedAt": "2023-04-22T20:49:32.71",
+        ///         "flowerCount": 0
         ///     },
         ///     {
         ///         "id": 4,
@@ -38,7 +41,8 @@ namespace DotnetWebApi.Dto
         ///         "subStandard": "哈哈",
         ///         "contents": "string",
         ///         "createdAt": "2023-04-22T20:49:32.71",
-        ///         "updatedAt": "2023-04-22T20:49:32.71"
+        ///         "updatedAt": "2023-04-22T20:49:32.71",
+        ///         "flowerCount": 0
         ///     }
         /// ]
         /// </example>

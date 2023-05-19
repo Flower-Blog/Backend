@@ -85,6 +85,7 @@ namespace DotnetWebApi.Controllers
                                               Title = a.Title,
                                               SubStandard = a.SubStandard,
                                               Contents = a.Contents,
+                                              FlowerCount = a.FlowerCount,
                                               CreatedAt = a.CreatedAt,
                                               UpdatedAt = a.UpdatedAt
                                           }))
@@ -339,17 +340,52 @@ namespace DotnetWebApi.Controllers
                     StatusCode = 403
                 };
 
-            _dbContext.Articles.Remove(article);
-            _dbContext.SaveChanges();
+            using (var transaction = _dbContext.Database.BeginTransaction())
+            {
+                try
+                {
+                    // 找出指定文章的所有留言
+                    var comments = _dbContext.Comments.Where(c => c.ArticleId == id).ToList();
 
-            return new ObjectResult(new
-            {
-                title = "刪除成功",
-                status = 204,
-            })
-            {
-                StatusCode = 204
-            };
+                    // 刪除留言的按讚紀錄
+                    foreach (var comment in comments)
+                    {
+                        var commentLikes = _dbContext.CommentLikes.Where(cl => cl.CommentId == comment.Id);
+                        _dbContext.CommentLikes.RemoveRange(commentLikes);
+                        _dbContext.SaveChanges();
+                    }
+
+                    // 刪除留言
+                    _dbContext.Comments.RemoveRange(comments);
+                    _dbContext.SaveChanges();
+
+                    // 刪除文章送花紀錄
+                    var flowerGivers = _dbContext.FlowerGivers.Where(fg => fg.ArticleId == id);
+                    _dbContext.FlowerGivers.RemoveRange(flowerGivers);
+
+                    _dbContext.SaveChanges();
+
+                    // 刪除文章
+                    _dbContext.Articles.Remove(article);
+                    _dbContext.SaveChanges();
+
+
+                    transaction.Commit();
+                    return new ObjectResult(new
+                    {
+                        title = "刪除成功",
+                        status = 204,
+                    })
+                    {
+                        StatusCode = 204
+                    };
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback(); // 發生錯誤時回滾交易
+                    throw; // 繼續拋出例外
+                }
+            }
         }
 
         /// <summary>
