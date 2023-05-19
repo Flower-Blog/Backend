@@ -21,57 +21,6 @@ namespace DotnetWebApi.Controllers
             _dbContext = dbContext;
             _mailService = mailService;
         }
-        /// <summary>
-        /// 新增個人文章
-        /// </summary>
-        [HttpPost("/articles")]
-        [Authorize(Roles = "user,admin")]
-        [ProducesResponseType(typeof(AddArticleDto201), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(AddArticleDto400), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(AddArticleDto500), StatusCodes.Status500InternalServerError)]
-        public ActionResult AddArticle([FromBody] AddArticleDto value)
-        {
-            // 拿取 
-            var authHeader = HttpContext.Request.Headers["Authorization"];
-
-            // 從authorization header提取Bearer
-            var token = authHeader.ToString().Replace("Bearer ", "");
-
-            // 解碼 token 並取得其聲明
-            var handler = new JwtSecurityTokenHandler();
-            var decodedToken = handler.ReadJwtToken(token);
-
-            // 從解碼後的 token 中取得 payload
-            var payload = decodedToken.Payload;
-
-            // 從 payload 拿取address
-            string userAddress = (string)payload["address"];
-
-            // 從user資料表找user id
-            int userId = (from a in _dbContext.Users
-                          where a.Address == userAddress
-                          select a.Id).FirstOrDefault();
-
-            var newArticle = new Article
-            {
-                UserId = userId,
-                Title = value.Title,
-                SubStandard = value.SubStandard,
-                Contents = value.Contents,
-                State = true
-            };
-            try
-            {
-                _dbContext.Articles.Add(newArticle);
-                _dbContext.SaveChanges();
-            }
-            catch
-            {
-                return StatusCode(500, "新增文章失敗");
-            }
-
-            return CreatedAtAction("GetArticle", "Article", new { id = newArticle.Id }, value);
-        }
 
         /// <summary>
         /// 取得所有文章(最新)
@@ -93,6 +42,7 @@ namespace DotnetWebApi.Controllers
                                              Title = a.Title,
                                              SubStandard = a.SubStandard,
                                              Contents = a.Contents,
+                                             FlowerCount = a.FlowerCount,
                                              CreatedAt = a.CreatedAt,
                                              UpdatedAt = a.UpdatedAt,
                                              userdata = new UserData
@@ -188,7 +138,57 @@ namespace DotnetWebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// 新增個人文章
+        /// </summary>
+        [HttpPost("/articles")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(AddArticleDto201), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(AddArticleDto400), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AddArticleDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult AddArticle([FromBody] AddArticleDto value)
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
 
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            // 從user資料表找user id
+            int userId = (from a in _dbContext.Users
+                          where a.Address == userAddress
+                          select a.Id).FirstOrDefault();
+
+            var newArticle = new Article
+            {
+                UserId = userId,
+                Title = value.Title,
+                SubStandard = value.SubStandard,
+                Contents = value.Contents,
+                State = true
+            };
+            try
+            {
+                _dbContext.Articles.Add(newArticle);
+                _dbContext.SaveChanges();
+            }
+            catch
+            {
+                return StatusCode(500, "新增文章失敗");
+            }
+
+            return CreatedAtAction("GetArticle", "Article", new { id = newArticle.Id }, value);
+        }
 
         /// <summary>
         /// 編輯個人文章
@@ -328,6 +328,64 @@ namespace DotnetWebApi.Controllers
             {
                 StatusCode = 204
             };
+        }
+
+        /// <summary>
+        /// 送花
+        /// </summary>
+        [HttpPost("/articles/flower")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(GiveFlowerDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GiveFlowerDto401), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(GiveFlowerDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GiveFlower([FromBody] GiveFlowerDto value)
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
+
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            // 從user資料表找user id
+            int userId = (from a in _dbContext.Users
+                          where a.Address == userAddress
+                          select a.Id).FirstOrDefault();
+
+            var record = new FlowerGiver
+            {
+                FlowerId = value.FlowerId,
+                UserId = userId,
+                ArticleId = value.ArticleId,
+            };
+            var Article = _dbContext.Articles.SingleOrDefault(u => u.Id == value.ArticleId);
+
+            try
+            {
+                _dbContext.FlowerGivers.Add(record);
+                Article.FlowerCount = Article.FlowerCount + 1;
+                _dbContext.Entry(Article).State = EntityState.Modified;
+                _dbContext.SaveChanges();
+            }
+            catch
+            {
+                return StatusCode(500, "送花失敗");
+            }
+
+            return Ok(new
+            {
+                StatusCode = 200,
+                title = "送花成功"
+            });
         }
     }
 }

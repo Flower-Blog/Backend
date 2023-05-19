@@ -15,6 +15,8 @@ public partial class Article
 
     public string Contents { get; set; }
 
+    public int FlowerCount { get; set; }
+
     public bool State { get; set; }
 
     public DateTime CreatedAt { get; set; }

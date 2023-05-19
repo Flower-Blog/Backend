@@ -29,10 +29,11 @@ public partial class BlogContext : DbContext
 
     public virtual DbSet<Mail> Mail { get; set; }
 
+    public virtual DbSet<Test> Tests { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){}
-
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Article>(entity =>
@@ -177,6 +178,24 @@ public partial class BlogContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<Test>(entity =>
+        {
+            entity.ToTable("Test");
+
+            entity.Property(e => e.City)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.FirstName)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.HeroName)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.LastName)
+                .IsRequired()
+                .HasMaxLength(50);
         });
 
         modelBuilder.Entity<User>(entity =>

@@ -25,7 +25,7 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 新增留言(需攜帶Token)
         /// </summary>
-        [HttpPost("/")]
+        [HttpPost("/comment")]
         [ProducesResponseType(typeof(CreateCommentDto201), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(CreateCommentDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(CreateCommentDto400), StatusCodes.Status400BadRequest)]
@@ -85,7 +85,7 @@ namespace DotnetWebApi.Controllers
         /// <param name="id" example="2">留言編號</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        [HttpPatch("/{id}")]
+        [HttpPatch("/comment/{id}")]
         [Authorize(Roles = "user,admin")]
         [ProducesResponseType(typeof(EditCommentDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(EditCommentDto401), StatusCodes.Status401Unauthorized)]
@@ -166,7 +166,7 @@ namespace DotnetWebApi.Controllers
         /// </summary>
         /// <param name="id" example="2">留言編號</param>
         /// <returns></returns>
-        [HttpDelete("/{id}")]
+        [HttpDelete("/comment/{id}")]
         [Authorize(Roles = "user,admin")]
         [ProducesResponseType(typeof(DeleteCommentDto204), StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(DeleteCommentDto401), StatusCodes.Status401Unauthorized)]
@@ -221,7 +221,7 @@ namespace DotnetWebApi.Controllers
         /// 取得單一文章所有留言(最新)
         /// </summary>
         /// <param name="id" example="2">文章編號</param>
-        [HttpGet("/{id}")]
+        [HttpGet("/comment/{id}")]
         [ProducesResponseType(typeof(GetSingleArticleCommentsDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(GetSingleArticleCommentsDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(GetSingleArticleCommentsDto500), StatusCodes.Status500InternalServerError)]
@@ -257,7 +257,7 @@ namespace DotnetWebApi.Controllers
         /// 留言按讚
         /// </summary>
         /// <param name="id" example="2">留言編號</param>
-        [HttpGet("/{id}/like")]
+        [HttpGet("/comment/{id}/like")]
         [Authorize(Roles = "user,admin")]
         [ProducesResponseType(typeof(CommentLikeDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(CommentLikeDto400), StatusCodes.Status400BadRequest)]
