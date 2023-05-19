@@ -3,9 +3,10 @@ using DotnetWebApi.Models;
 
 namespace DotnetWebApi.Dto
 {
-    public class UserData
+    public class UserDataDto
     {
         public string Name { get; set; }
+        public string Picture { get; set; }
     }
     public class GetAllArticlesDto
     {
@@ -26,9 +27,10 @@ namespace DotnetWebApi.Dto
         /// <example>
         ///     {
         ///         "Name": "Andy",
+        ///         "Picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png"
         ///     },
         /// </example>
-        public UserData userdata { get; set; }
+        public UserDataDto userdata { get; set; }
     }
     public class GetAllArticlesDto200
     {

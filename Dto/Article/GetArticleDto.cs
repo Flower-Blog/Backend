@@ -3,6 +3,20 @@ using DotnetWebApi.Models;
 
 namespace DotnetWebApi.Dto
 {
+    public class CommentsDto
+    {
+        public int Id { get; set; }
+        public string Contents { get; set; }
+        public int Likes { get; set; }
+        public DateTime CreatedAt { get; set; }
+        /// <example>
+        ///     {
+        ///         "Name": "Andy",
+        ///         "Picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png"
+        ///     },
+        /// </example>
+        public UserDataDto userdata { get; set; }
+    }
     public class GetArticleDto
     {
         /// <example>1</example>
@@ -13,10 +27,22 @@ namespace DotnetWebApi.Dto
         public string SubStandard { get; set; }
         /// <exaple>簡潔的內容</exaple>
         public string Contents { get; set; }
+        /// <exaple>23</exaple>
+        public int FlowerCount { get; set; }
         /// <exaple>2023-04-22T20:49:32.71</exaple>
         public DateTime CreatedAt { get; set; }
         /// <exaple>2023-04-22T20:49:32.71</exaple>
         public DateTime UpdatedAt { get; set; }
+        public CommentsDto[] Comments { get; set; }
+
+    }
+    public class GetCommentDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Contents { get; set; }
+        public int Likes { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
     public class GetArticleDto200
     {
@@ -28,8 +54,31 @@ namespace DotnetWebApi.Dto
         ///     "title": "一些後勁蠻強的短篇冷笑話",
         ///     "subStandard": "test",
         ///     "contents": "string",
+        ///     "FlowerCount" : "23",
         ///     "createdAt": "2023-04-22T20:49:32.71",
-        ///     "updatedAt": "2023-04-22T20:49:32.71"
+        ///     "updatedAt": "2023-04-22T20:49:32.71",
+        ///     "comments": [
+        ///         {
+        ///             "id": 8,
+        ///             "contents": "哈哈！！",
+        ///             "likes": 0,
+        ///             "createdAt": "2023-05-19T20:22:30.803",
+        ///             "userdata": {
+        ///                 "name": "Andy1",
+        ///                 "picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png"
+        ///             }
+        ///         },
+        ///         {
+        ///             "id": 6,
+        ///             "contents": "哈哈真好笑！！！",
+        ///             "likes": 1,
+        ///             "createdAt": "2023-05-19T19:50:37.35",
+        ///             "userdata": {
+        ///                 "name": "Andy1",
+        ///                 "picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png"
+        ///             }
+        ///         }
+        ///     ]
         /// }
         /// </example>
         public object articles { get; set; }

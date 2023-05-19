@@ -218,42 +218,6 @@ namespace DotnetWebApi.Controllers
         }
 
         /// <summary>
-        /// 取得單一文章所有留言(最新)
-        /// </summary>
-        /// <param name="id" example="2">文章編號</param>
-        [HttpGet("/comment/{id}")]
-        [ProducesResponseType(typeof(GetSingleArticleCommentsDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetSingleArticleCommentsDto400), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(GetSingleArticleCommentsDto500), StatusCodes.Status500InternalServerError)]
-        public ActionResult GetSingleArticleComments(int id)
-        {
-            try
-            {
-                var Article = (from a in _dbContext.Articles
-                               where a.Id == id
-                               select a).FirstOrDefault();
-
-                if (Article == null)
-                {
-                    return StatusCode(400, "文章不存在");
-                }
-
-                // 拿取所有留言
-                var comments = _dbContext.Articles
-                                         .Where(a => a.Id == id)
-                                         .SelectMany(a => a.Comments)
-                                         .OrderByDescending(a => a.CreatedAt)
-                                         .Take(10);
-
-                return Ok(new { StatusCode = 200, comments });
-            }
-            catch
-            {
-                return StatusCode(500, "取得單一文章所有留言失敗");
-            }
-        }
-
-        /// <summary>
         /// 留言按讚
         /// </summary>
         /// <param name="id" example="2">留言編號</param>

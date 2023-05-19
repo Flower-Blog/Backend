@@ -45,9 +45,10 @@ namespace DotnetWebApi.Controllers
                                              FlowerCount = a.FlowerCount,
                                              CreatedAt = a.CreatedAt,
                                              UpdatedAt = a.UpdatedAt,
-                                             userdata = new UserData
+                                             userdata = new UserDataDto
                                              {
-                                                 Name = a.User.Name
+                                                 Name = a.User.Name,
+                                                 Picture = a.User.Picture
                                              },
                                          })
                                          .OrderByDescending(a => a.CreatedAt)
@@ -114,6 +115,25 @@ namespace DotnetWebApi.Controllers
         {
             try
             {
+                var comments = _dbContext.Articles
+                                         .Include(a => a.User)
+                                         .Where(a => a.Id == id)
+                                         .SelectMany(a => a.Comments)
+                                         .OrderByDescending(a => a.CreatedAt)
+                                         .Take(10)
+                                         .Select(a => new CommentsDto
+                                         {
+                                             Id = a.Id,
+                                             Contents = a.Contents,
+                                             Likes = a.Likes,
+                                             CreatedAt = a.CreatedAt,
+                                             userdata = new UserDataDto
+                                             {
+                                                 Name = a.User.Name,
+                                                 Picture = a.User.Picture
+                                             },
+                                         });
+
                 // 拿取單一文章
                 var article = (_dbContext.Articles
                                          .Include(a => a.User)
@@ -125,7 +145,9 @@ namespace DotnetWebApi.Controllers
                                              SubStandard = a.SubStandard,
                                              Contents = a.Contents,
                                              CreatedAt = a.CreatedAt,
-                                             UpdatedAt = a.UpdatedAt
+                                             UpdatedAt = a.UpdatedAt,
+                                             FlowerCount = a.FlowerCount,
+                                             Comments = comments.ToArray()
                                          })).FirstOrDefault();
                 if (article != null)
                     return Ok(new { StatusCode = 200, article });

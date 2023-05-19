@@ -36,4 +36,9 @@ public partial class User
     public virtual ICollection<FlowerGiver> FlowerGivers { get; } = new List<FlowerGiver>();
 
     public virtual ICollection<FlowerOwnership> FlowerOwnerships { get; } = new List<FlowerOwnership>();
+
+    public static implicit operator int(User v)
+    {
+        throw new NotImplementedException();
+    }
 }

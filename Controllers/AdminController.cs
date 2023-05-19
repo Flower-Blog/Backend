@@ -24,6 +24,7 @@ namespace DotnetWebApi.Controllers
         /// 使用者紀錄(最新)
         /// </summary>
         [HttpGet("/admin/user")]
+        [Authorize(Roles = "admin")]
         [ProducesResponseType(typeof(GetNewUsersDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(GetNewUsersDto500), StatusCodes.Status500InternalServerError)]
         public ActionResult GetNewUsers()
@@ -57,6 +58,7 @@ namespace DotnetWebApi.Controllers
         /// 花總類
         /// </summary>
         [HttpGet("/admin/flowers")]
+        [Authorize(Roles = "admin")]
         [ProducesResponseType(typeof(GetAllFlowersDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(GetAllFlowersDto500), StatusCodes.Status500InternalServerError)]
         public ActionResult GetAllFlowers()

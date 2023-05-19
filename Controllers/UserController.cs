@@ -50,6 +50,46 @@ namespace DotnetWebApi.Controllers
             // 從 payload 拿取address
             string userAddress = (string)payload["address"];
 
+            // 從user資料表找user id
+            int userId = (from a in _dbContext.Users
+                          where a.Address == userAddress
+                          select a.Id).FirstOrDefault();
+
+            var commentRecords = (from cl in _dbContext.CommentLikes
+                                  join c in _dbContext.Comments on cl.CommentId equals c.Id
+                                  join u in _dbContext.Users on c.UserId equals u.Id
+                                  where cl.UserId == userId
+                                  orderby cl.CreatedAt descending
+                                  select new CommentsDto
+                                  {
+                                      Id = c.Id,
+                                      Contents = c.Contents,
+                                      Likes = c.Likes,
+                                      CreatedAt = c.CreatedAt,
+                                      userdata = new UserDataDto
+                                      {
+                                          Name = u.Name,
+                                          Picture = u.Picture
+                                      },
+                                  }).Take(10);
+
+            var flowerRecords = (from cl in _dbContext.FlowerGivers
+                                 join c in _dbContext.Articles on cl.ArticleId equals c.Id
+                                 join u in _dbContext.Users on c.UserId equals u.Id
+                                 where cl.UserId == userId
+                                 orderby cl.CreatedAt descending
+                                 select new FlowerDto
+                                 {
+                                     Id = c.Id,
+                                     FlowerId = cl.FlowerId,
+                                     CreatedAt = cl.CreatedAt,
+                                     Article = new Article_FlowerDto
+                                     {
+                                         id = c.Id,
+                                         Title = c.Title
+                                     },
+                                 }).Take(10);
+
             var userdata = from a in _dbContext.Users
                            where a.Address == userAddress
                            select new GetUserDataDto
@@ -62,23 +102,27 @@ namespace DotnetWebApi.Controllers
                                BackgroundPhoto = a.BackgroundPhoto,
                                Picture = a.Picture
                            };
+
             return Ok(new
             {
                 StatusCode = 200,
-                userdata
+                userdata,
+                commentRecords,
+                flowerRecords
             });
         }
+
 
         /// <summary>
         /// 獲取特定使用者資料
         /// </summary>
-        [HttpGet("/user/{username}")]
+        [HttpGet("/user/{name}")]
         [ProducesResponseType(typeof(GetCreaterDataDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(GetCreaterDataDto404), StatusCodes.Status404NotFound)]
-        public ActionResult GetCreaterDataDto(string username)
+        public ActionResult GetCreaterDataDto(string name)
         {
             var userdata = (from a in _dbContext.Users
-                            where a.Name == username
+                            where a.Name == name
                             select new GetUserDataDto
                             {
                                 Id = a.Id,
@@ -251,21 +295,50 @@ namespace DotnetWebApi.Controllers
 
             if (userETF == null)
             {
-                var entity = _dbContext.Users.Add(new User
+                using (var transaction = _dbContext.Database.BeginTransaction())
                 {
-                    Name = value.Name,
-                    Address = value.Address,
-                    Email = value.Email,
-                    BackgroundPhoto = $"https://{_config["IP"]}:3000/BackgroundPhoto/Unknow.png",
-                    Picture = $"https://{_config["IP"]}:3000/Picture/Unknow.png",
-                    Nonce = Guid.NewGuid().ToString(),
-                    Admin = value.admin
-                });
-                _dbContext.SaveChanges();
+                    try
+                    {
+                        var entity = _dbContext.Users.Add(new User
+                        {
+                            Name = value.Name,
+                            Address = value.Address,
+                            Email = value.Email,
+                            BackgroundPhoto = $"https://{_config["IP"]}:3000/BackgroundPhoto/Unknow.png",
+                            Picture = $"https://{_config["IP"]}:3000/Picture/Unknow.png",
+                            Nonce = Guid.NewGuid().ToString(),
+                            Admin = value.admin
+                        });
+                        _dbContext.SaveChanges();
 
-                return CreatedAtAction("IsUser", "Auth", new { address = value.Address }, value);
+                        int insertedId = entity.Entity.Id;
 
+                        var flowerIds = _dbContext.Flowers.Select(x => x.Id).ToList();
+                        foreach (var flowerId in flowerIds)
+                        {
+                            _dbContext.FlowerOwnerships.Add(new FlowerOwnership
+                            {
+                                UserId = insertedId,
+                                Flowerid = flowerId,
+                                FlowerCount = 0
+                            });
+                        }
+
+
+                        _dbContext.SaveChanges();
+
+                        transaction.Commit();
+
+                        return CreatedAtAction("IsUser", "Auth", new { address = value.Address }, value);
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback(); // 發生錯誤時回滾交易
+                        throw; // 繼續拋出例外
+                    }
+                }
             }
+
             dynamic response = new ExpandoObject();
             response.StatusCode = 409;
             response.Title = "有資料被使用過了 拒絕註冊";
@@ -274,6 +347,7 @@ namespace DotnetWebApi.Controllers
             if (AddressUse != null) response.Address = "地址被使用過";
             return Conflict(response);
         }
+
 
         /// <summary>
         /// 確認電子郵件是否使用過-註冊
@@ -393,6 +467,77 @@ namespace DotnetWebApi.Controllers
             });
         }
 
+        /// <summary>
+        /// 我的花(需攜帶Token)
+        /// </summary>
+        [HttpGet("/user/flower")]
+        [Authorize(Roles = "user,admin")]
+        [ProducesResponseType(typeof(GetUserDataDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserDataDto401), StatusCodes.Status401Unauthorized)]
+        public ActionResult GetMyFlower()
+        {
+            // 拿取 
+            var authHeader = HttpContext.Request.Headers["Authorization"];
 
+            // 從authorization header提取Bearer
+            var token = authHeader.ToString().Replace("Bearer ", "");
+
+            // 解碼 token 並取得其聲明
+            var handler = new JwtSecurityTokenHandler();
+            var decodedToken = handler.ReadJwtToken(token);
+
+            // 從解碼後的 token 中取得 payload
+            var payload = decodedToken.Payload;
+
+            // 從 payload 拿取address
+            string userAddress = (string)payload["address"];
+
+            // 從user資料表找user id
+            int userId = (from a in _dbContext.Users
+                          where a.Address == userAddress
+                          select a.Id).FirstOrDefault();
+
+            var flowerRecords = _dbContext.FlowerOwnerships
+                            .Where(a => a.UserId == userId)
+                            .Select(a => new
+                            {
+                                a.Flowerid,
+                                a.FlowerCount
+                            })
+                            .ToList();
+            return Ok(new
+            {
+                StatusCode = 200,
+                flowerRecords
+            });
+        }
+
+        /// <summary>
+        /// 創作者收藏花
+        /// </summary>
+        [HttpGet("/user/flower/{name}")]
+        [ProducesResponseType(typeof(GetUserDataDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserDataDto401), StatusCodes.Status401Unauthorized)]
+        public ActionResult GetUserFlower(string name)
+        {
+            // 從user資料表找user id
+            int userId = (from a in _dbContext.Users
+                          where a.Name == name
+                          select a.Id).FirstOrDefault();
+
+            var flowerRecords = _dbContext.FlowerOwnerships
+                            .Where(a => a.UserId == userId)
+                            .Select(a => new
+                            {
+                                a.Flowerid,
+                                a.FlowerCount
+                            })
+                            .ToList();
+            return Ok(new
+            {
+                StatusCode = 200,
+                flowerRecords
+            });
+        }
     }
 }
