@@ -1,5 +1,4 @@
 #!/bin/bash
-Chinese_Taiwan_Stroke_CS_AS
 # SQL 創建表
 CREATE TABLE [Users] (
   [Id] int PRIMARY KEY NOT NULL IDENTITY(1, 1),

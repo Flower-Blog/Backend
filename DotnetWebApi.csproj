@@ -6,7 +6,7 @@
     <OutputPath>bin\</OutputPath>
     <DocumentationFile>bin\net6.0\DotnetWebApi.xml</DocumentationFile>
     <NoWarn>1591</NoWarn>
-    <UserSecretsId>bb621410-72b6-467b-998e-0683354fd5b9</UserSecretsId>
+    <UserSecretsId>62939800-6a5b-4c49-9c4e-1486956db8ec</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
