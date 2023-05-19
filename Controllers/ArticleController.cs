@@ -394,6 +394,7 @@ namespace DotnetWebApi.Controllers
         [HttpPost("/articles/flower")]
         [Authorize(Roles = "user,admin")]
         [ProducesResponseType(typeof(GiveFlowerDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GiveFlowerDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(GiveFlowerDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(GiveFlowerDto500), StatusCodes.Status500InternalServerError)]
         public ActionResult GiveFlower([FromBody] GiveFlowerDto value)
@@ -426,12 +427,39 @@ namespace DotnetWebApi.Controllers
                 ArticleId = value.ArticleId,
             };
             var Article = _dbContext.Articles.SingleOrDefault(u => u.Id == value.ArticleId);
+            var UserFlower = _dbContext.FlowerOwnerships.SingleOrDefault(u => u.UserId == userId && u.Flowerid == value.FlowerId);
+            var CreaterFlower = _dbContext.FlowerOwnerships.SingleOrDefault(u => u.UserId == Article.UserId && u.Flowerid == value.FlowerId);
 
+
+            if (UserFlower.FlowerCount == 0)
+            {
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = "你的花不夠"
+                });
+            }
+            if (userId == Article.UserId)
+            {
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = "很抱歉，不可以送自己花"
+                });
+            }
             try
             {
                 _dbContext.FlowerGivers.Add(record);
                 Article.FlowerCount = Article.FlowerCount + 1;
+                UserFlower.FlowerCount = UserFlower.FlowerCount - 1;
+                CreaterFlower.FlowerCount = CreaterFlower.FlowerCount + 1;
                 _dbContext.Entry(Article).State = EntityState.Modified;
+                _dbContext.Entry(UserFlower).State = EntityState.Modified;
+                _dbContext.Entry(CreaterFlower).State = EntityState.Modified;
                 _dbContext.SaveChanges();
             }
             catch
