@@ -25,19 +25,20 @@ public partial class BlogContext : DbContext
 
     public virtual DbSet<FlowerGiver> FlowerGivers { get; set; }
 
-    public virtual DbSet<FlowerOwnerhip> FlowerOwnerhips { get; set; }
+    public virtual DbSet<FlowerOwnership> FlowerOwnerships { get; set; }
 
     public virtual DbSet<Mail> Mail { get; set; }
+
+    public virtual DbSet<Test> Tests { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Article>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Articles__3214EC072F089C02");
+            entity.HasKey(e => e.Id).HasName("PK__Articles__3214EC07E6D62B72");
 
             entity.Property(e => e.Contents).IsRequired();
             entity.Property(e => e.CreatedAt)
@@ -45,7 +46,7 @@ public partial class BlogContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.SubStandard)
                 .IsRequired()
-                .HasMaxLength(42)
+                .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.Title)
                 .IsRequired()
@@ -63,7 +64,7 @@ public partial class BlogContext : DbContext
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC078EE8ADEA");
+            entity.HasKey(e => e.Id).HasName("PK__Comments__3214EC07451B03F7");
 
             entity.Property(e => e.Contents)
                 .IsRequired()
@@ -89,7 +90,7 @@ public partial class BlogContext : DbContext
 
         modelBuilder.Entity<CommentLike>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.CommentId }).HasName("PK__CommentL__ABB381B08CFB26CA");
+            entity.HasKey(e => new { e.UserId, e.CommentId }).HasName("PK__CommentL__ABB381B0FBC24E73");
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -108,11 +109,11 @@ public partial class BlogContext : DbContext
 
         modelBuilder.Entity<Flower>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Flowers__3214EC074C8AF387");
+            entity.HasKey(e => e.Id).HasName("PK__Flowers__3214EC07B8B73D86");
 
             entity.Property(e => e.Language)
                 .IsRequired()
-                .HasMaxLength(42)
+                .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.Name)
                 .IsRequired()
@@ -122,7 +123,7 @@ public partial class BlogContext : DbContext
 
         modelBuilder.Entity<FlowerGiver>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FlowerGi__3214EC0798C2784D");
+            entity.HasKey(e => e.Id).HasName("PK__FlowerGi__3214EC07BC2D7F23");
 
             entity.ToTable("FlowerGiver");
 
@@ -146,18 +147,18 @@ public partial class BlogContext : DbContext
                 .HasConstraintName("FK__FlowerGiv__UserI__5629CD9C");
         });
 
-        modelBuilder.Entity<FlowerOwnerhip>(entity =>
+        modelBuilder.Entity<FlowerOwnership>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FlowerOw__3214EC07456176B3");
+            entity.HasKey(e => e.Id).HasName("PK__FlowerOw__3214EC077D87F70C");
 
-            entity.ToTable("FlowerOwnerhip");
+            entity.ToTable("FlowerOwnership");
 
-            entity.HasOne(d => d.Flower).WithMany(p => p.FlowerOwnerhips)
+            entity.HasOne(d => d.Flower).WithMany(p => p.FlowerOwnerships)
                 .HasForeignKey(d => d.Flowerid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__FlowerOwn__Flowe__59063A47");
 
-            entity.HasOne(d => d.User).WithMany(p => p.FlowerOwnerhips)
+            entity.HasOne(d => d.User).WithMany(p => p.FlowerOwnerships)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__FlowerOwn__UserI__5812160E");
@@ -165,7 +166,7 @@ public partial class BlogContext : DbContext
 
         modelBuilder.Entity<Mail>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Mail__3214EC076D2B5174");
+            entity.HasKey(e => e.Id).HasName("PK__Mail__3214EC071AB315F1");
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -179,19 +180,43 @@ public partial class BlogContext : DbContext
                 .HasColumnType("datetime");
         });
 
+        modelBuilder.Entity<Test>(entity =>
+        {
+            entity.ToTable("Test");
+
+            entity.Property(e => e.City)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.FirstName)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.HeroName)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(e => e.LastName)
+                .IsRequired()
+                .HasMaxLength(50);
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC073E07664E");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC077C367867");
 
             entity.Property(e => e.Address)
                 .IsRequired()
                 .HasMaxLength(42)
+                .IsUnicode(false);
+            entity.Property(e => e.BackgroundPhoto)
+                .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Email)
                 .IsRequired()
+                .HasMaxLength(255)
+                .IsUnicode(false);
+            entity.Property(e => e.Introduction)
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.Name)
@@ -201,6 +226,9 @@ public partial class BlogContext : DbContext
             entity.Property(e => e.Nonce)
                 .IsRequired()
                 .HasMaxLength(42)
+                .IsUnicode(false);
+            entity.Property(e => e.Picture)
+                .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
