@@ -168,7 +168,7 @@ namespace DotnetWebApi.Controllers
         /// <returns></returns>
         [HttpDelete("/comment/{id}")]
         [Authorize(Roles = "user,admin")]
-        [ProducesResponseType(typeof(DeleteCommentDto204), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(DeleteCommentDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DeleteCommentDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(DeleteCommentDto403), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(DeleteCommentDto404), StatusCodes.Status404NotFound)]
@@ -214,7 +214,11 @@ namespace DotnetWebApi.Controllers
             _dbContext.Comments.Remove(comment);
             _dbContext.SaveChanges();
 
-            return StatusCode(200, "刪除成功");
+            return Ok(new
+            {
+                StatusCode = 200,
+                title = "刪除成功"
+            });
         }
 
         /// <summary>

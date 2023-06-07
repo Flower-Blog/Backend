@@ -14,6 +14,14 @@ namespace DotnetWebApi.Dto
         public DateTime CreatedAt { get; set; }
         public Article_FlowerDto Article { get; set; }
     }
+    public class ReceiveFlowersRecordsDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int FlowerId { get; set; }
+        public Article_FlowerDto Article { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
     public class GetUserDataDto
     {
         /// <example>1</example>
@@ -30,6 +38,8 @@ namespace DotnetWebApi.Dto
         public string BackgroundPhoto { get; set; }
         /// <example>https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Code.org_logo.svg/1200px-Code.org_logo.svg.png</example>
         public string Picture { get; set; }
+        /// <example>true</example>
+        public bool Admin { get; set; }
     }
     public class GetUserDataDto200
     {
@@ -44,7 +54,8 @@ namespace DotnetWebApi.Dto
         ///     "email": "andy910812@gmail.com",
         ///     "introduction": "自我介紹",
         ///     "backgroundPhoto": "https://localhost:3000/BackgroundPhoto/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png",
-        ///     "picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png"
+        ///     "picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png",
+        ///     "admin": false
         ///     }
         /// ]
         /// </example>

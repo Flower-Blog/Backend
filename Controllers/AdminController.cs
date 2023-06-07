@@ -81,5 +81,48 @@ namespace DotnetWebApi.Controllers
                 return StatusCode(500, "取得花總類失敗");
             }
         }
+
+        /// <summary>
+        /// 送花紀錄
+        /// </summary>
+        [HttpGet("/admin/record")]
+        [Authorize(Roles = "admin")]
+        [ProducesResponseType(typeof(GiveFlowerRecordDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GiveFlowerRecordDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GiveFlowerRecord()
+        {
+            try
+            {
+                // 拿取所有文章
+                var flowerRecords = _dbContext.FlowerGivers
+                                            .Include(a => a.User)
+                                            .Include(a => a.Article)
+                                            .Where(a => a.Article.Id == a.ArticleId)
+                                            .Select(a => new GiveFlowerRecordDto
+                                            {
+                                                FlowerId = a.FlowerId,
+                                                article = new ArtilceDto
+                                                {
+                                                    Id = a.ArticleId,
+                                                    Name = a.Article.User.Name,
+                                                    Title = a.Article.Title
+                                                },
+                                                userdata = new UserDataDto
+                                                {
+                                                    Name = a.User.Name,
+                                                    Picture = a.User.Picture
+                                                },
+                                                CreatedAt = a.CreatedAt,
+                                            })
+                                            .OrderByDescending(a => a.CreatedAt)
+                                            .Take(10);
+
+                return Ok(new { StatusCode = 200, flowerRecords });
+            }
+            catch
+            {
+                return StatusCode(500, "取得花總類失敗");
+            }
+        }
     }
 }

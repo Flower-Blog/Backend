@@ -73,22 +73,22 @@ namespace DotnetWebApi.Controllers
                                       },
                                   }).Take(10);
 
-            var flowerRecords = (from cl in _dbContext.FlowerGivers
-                                 join c in _dbContext.Articles on cl.ArticleId equals c.Id
-                                 join u in _dbContext.Users on c.UserId equals u.Id
-                                 where cl.UserId == userId
-                                 orderby cl.CreatedAt descending
-                                 select new FlowerDto
-                                 {
-                                     Id = c.Id,
-                                     FlowerId = cl.FlowerId,
-                                     CreatedAt = cl.CreatedAt,
-                                     Article = new Article_FlowerDto
-                                     {
-                                         id = c.Id,
-                                         Title = c.Title
-                                     },
-                                 }).Take(10);
+            var SendFlowersRecords = (from cl in _dbContext.FlowerGivers
+                                      join c in _dbContext.Articles on cl.ArticleId equals c.Id
+                                      join u in _dbContext.Users on c.UserId equals u.Id
+                                      where cl.UserId == userId
+                                      orderby cl.CreatedAt descending
+                                      select new FlowerDto
+                                      {
+                                          Id = cl.Id,
+                                          FlowerId = cl.FlowerId,
+                                          CreatedAt = cl.CreatedAt,
+                                          Article = new Article_FlowerDto
+                                          {
+                                              id = c.Id,
+                                              Title = c.Title
+                                          },
+                                      }).Take(10);
 
             var userdata = from a in _dbContext.Users
                            where a.Address == userAddress
@@ -100,15 +100,35 @@ namespace DotnetWebApi.Controllers
                                Email = a.Email,
                                Introduction = a.Introduction,
                                BackgroundPhoto = a.BackgroundPhoto,
-                               Picture = a.Picture
+                               Picture = a.Picture,
+                               Admin = a.Admin
                            };
+
+            var ReceiveFlowersRecords = (from cl in _dbContext.FlowerGivers
+                                         join c in _dbContext.Articles on cl.ArticleId equals c.Id
+                                         where c.UserId == userId
+                                         join u in _dbContext.Users on cl.UserId equals u.Id
+                                         orderby cl.CreatedAt descending
+                                         select new ReceiveFlowersRecordsDto
+                                         {
+                                             Id = cl.Id,
+                                             FlowerId = cl.FlowerId,
+                                             Name = u.Name,
+                                             Article = new Article_FlowerDto
+                                             {
+                                                 id = c.Id,
+                                                 Title = c.Title
+                                             },
+                                             CreatedAt = cl.CreatedAt,
+                                         }).Take(10);
 
             return Ok(new
             {
                 StatusCode = 200,
                 userdata,
                 commentRecords,
-                flowerRecords
+                SendFlowersRecords,
+                ReceiveFlowersRecords
             });
         }
 
@@ -123,7 +143,7 @@ namespace DotnetWebApi.Controllers
         {
             var userdata = (from a in _dbContext.Users
                             where a.Name == name
-                            select new GetUserDataDto
+                            select new GetCreaterDataDto
                             {
                                 Id = a.Id,
                                 Name = a.Name,
@@ -197,11 +217,15 @@ namespace DotnetWebApi.Controllers
 
             var user = _dbContext.Users.SingleOrDefault(u => u.Address == userAddress);
 
+            var BackgroundPhotoType = "";
+            var PicturePhotoType = "";
             try
             {
                 var _uploadedfiles = Request.Form.Files;
                 UserHandle test = new UserHandle();
                 bool BackgroundPhoto = true;
+                var user_Background_file_type = test.GetUserImageFileType(user.BackgroundPhoto);
+                var user_Picture_file_type = test.GetUserImageFileType(user.Picture);
 
                 foreach (IFormFile source in _uploadedfiles)
                 {
@@ -215,9 +239,12 @@ namespace DotnetWebApi.Controllers
 
                     string imagepath = Filepath + $"//image.{FileType}";
 
-                    if (System.IO.File.Exists(imagepath))
+                    string useImagepath = BackgroundPhoto ? Filepath + $"//image.{user_Background_file_type}" : Filepath + $"//image.{user_Picture_file_type}";
+                    if (BackgroundPhoto) BackgroundPhotoType = FileType;
+                    else PicturePhotoType = FileType;
+                    if (System.IO.File.Exists(useImagepath))
                     {
-                        System.IO.File.Delete(imagepath);
+                        System.IO.File.Delete(useImagepath);
                     }
                     using (FileStream stream = System.IO.File.Create(imagepath))
                     {
@@ -235,8 +262,8 @@ namespace DotnetWebApi.Controllers
             user.Name = value.Name;
             user.Email = value.Email;
             user.Introduction = value.Introduction;
-            user.BackgroundPhoto = $"https://{_config["IP"]}:3000/BackgroundPhoto/{userAddress}/image.png";
-            user.Picture = $"https://{_config["IP"]}:3000/Picture/{userAddress}/image.png";
+            user.BackgroundPhoto = BackgroundPhotoType != "" ? $"https://{_config["IP"]}/BackgroundPhoto/{userAddress}/image.{BackgroundPhotoType}" : user.BackgroundPhoto;
+            user.Picture = PicturePhotoType != "" ? $"https://{_config["IP"]}/Picture/{userAddress}/image.{PicturePhotoType}" : user.Picture;
             user.UpdatedAt = DateTime.Now;
 
 
@@ -249,7 +276,7 @@ namespace DotnetWebApi.Controllers
                 return Ok(new
                 {
                     StatusCode = 200,
-                    title = "修改成功"
+                    title = "修改成功",
                 });
             }
             catch (DbUpdateConcurrencyException)
@@ -304,8 +331,8 @@ namespace DotnetWebApi.Controllers
                             Name = value.Name,
                             Address = value.Address,
                             Email = value.Email,
-                            BackgroundPhoto = $"https://{_config["IP"]}:3000/BackgroundPhoto/Unknow.png",
-                            Picture = $"https://{_config["IP"]}:3000/Picture/Unknow.png",
+                            BackgroundPhoto = $"https://{_config["IP"]}/BackgroundPhoto/Unknow.png",
+                            Picture = $"https://{_config["IP"]}/Picture/Unknow.png",
                             Nonce = Guid.NewGuid().ToString(),
                             Admin = value.admin
                         });
@@ -314,13 +341,16 @@ namespace DotnetWebApi.Controllers
                         int insertedId = entity.Entity.Id;
 
                         var flowerIds = _dbContext.Flowers.Select(x => x.Id).ToList();
+
                         foreach (var flowerId in flowerIds)
                         {
+                            int Count = 0;
+                            if (flowerId == value.FlowerId) Count = 1;
                             _dbContext.FlowerOwnerships.Add(new FlowerOwnership
                             {
                                 UserId = insertedId,
                                 Flowerid = flowerId,
-                                FlowerCount = 0
+                                FlowerCount = Count,
                             });
                         }
 
@@ -389,8 +419,6 @@ namespace DotnetWebApi.Controllers
                 // 找不到使用者email 就幫他新增進去
                 if (mailETF == null)
                 {
-                    Console.WriteLine("email: " + email);
-                    Console.WriteLine("VerificationCode: " + VerificationCode);
                     var entity = _dbContext.Mail.Add(new Mail
                     {
                         Email = email,
@@ -467,50 +495,50 @@ namespace DotnetWebApi.Controllers
             });
         }
 
-        /// <summary>
+        /*/// <summary>
         /// 我的花(需攜帶Token)
-        /// </summary>
-        [HttpGet("/user/flower")]
-        [Authorize(Roles = "user,admin")]
-        [ProducesResponseType(typeof(GetMyFlowerDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetMyFlowerDto401), StatusCodes.Status401Unauthorized)]
-        public ActionResult GetMyFlower()
-        {
-            // 拿取 
-            var authHeader = HttpContext.Request.Headers["Authorization"];
+        /// </summary>*/
+        // [HttpGet("/user/flower")]
+        // [Authorize(Roles = "user,admin")]
+        // [ProducesResponseType(typeof(GetMyFlowerDto200), StatusCodes.Status200OK)]
+        // [ProducesResponseType(typeof(GetMyFlowerDto401), StatusCodes.Status401Unauthorized)]
+        // public ActionResult GetMyFlower()
+        // {
+        //     // 拿取 
+        //     var authHeader = HttpContext.Request.Headers["Authorization"];
 
-            // 從authorization header提取Bearer
-            var token = authHeader.ToString().Replace("Bearer ", "");
+        //     // 從authorization header提取Bearer
+        //     var token = authHeader.ToString().Replace("Bearer ", "");
 
-            // 解碼 token 並取得其聲明
-            var handler = new JwtSecurityTokenHandler();
-            var decodedToken = handler.ReadJwtToken(token);
+        //     // 解碼 token 並取得其聲明
+        //     var handler = new JwtSecurityTokenHandler();
+        //     var decodedToken = handler.ReadJwtToken(token);
 
-            // 從解碼後的 token 中取得 payload
-            var payload = decodedToken.Payload;
+        //     // 從解碼後的 token 中取得 payload
+        //     var payload = decodedToken.Payload;
 
-            // 從 payload 拿取address
-            string userAddress = (string)payload["address"];
+        //     // 從 payload 拿取address
+        //     string userAddress = (string)payload["address"];
 
-            // 從user資料表找user id
-            int userId = (from a in _dbContext.Users
-                          where a.Address == userAddress
-                          select a.Id).FirstOrDefault();
+        //     // 從user資料表找user id
+        //     int userId = (from a in _dbContext.Users
+        //                   where a.Address == userAddress
+        //                   select a.Id).FirstOrDefault();
 
-            var flowerRecords = _dbContext.FlowerOwnerships
-                            .Where(a => a.UserId == userId)
-                            .Select(a => new
-                            {
-                                a.Flowerid,
-                                a.FlowerCount
-                            })
-                            .ToList();
-            return Ok(new
-            {
-                StatusCode = 200,
-                flowerRecords
-            });
-        }
+        //     var flowerRecords = _dbContext.FlowerOwnerships
+        //                     .Where(a => a.UserId == userId)
+        //                     .Select(a => new
+        //                     {
+        //                         a.Flowerid,
+        //                         a.FlowerCount
+        //                     })
+        //                     .ToList();
+        //     return Ok(new
+        //     {
+        //         StatusCode = 200,
+        //         flowerRecords
+        //     });
+        // }
 
         /// <summary>
         /// 創作者收藏花

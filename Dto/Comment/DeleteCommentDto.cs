@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DotnetWebApi.Dto
 {
-    public class DeleteCommentDto204
+    public class DeleteCommentDto200
     {
-        /// <example>204</example>
+        /// <example>200</example>
         public string StatusCode { get; set; }
         /// <example>刪除成功</example>
         public string title { get; set; }

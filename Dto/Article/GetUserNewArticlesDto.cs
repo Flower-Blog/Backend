@@ -3,12 +3,7 @@ using DotnetWebApi.Models;
 
 namespace DotnetWebApi.Dto
 {
-    public class UserDataDto
-    {
-        public string Name { get; set; }
-        public string Picture { get; set; }
-    }
-    public class GetAllArticlesDto
+    public class GetUserNewArticlesDto
     {
         /// <example>1</example>
         public int Id { get; set; }
@@ -24,15 +19,8 @@ namespace DotnetWebApi.Dto
         public DateTime CreatedAt { get; set; }
         /// <exaple>2023-04-22T20:49:32.71</exaple>
         public DateTime UpdatedAt { get; set; }
-        /// <example>
-        ///     {
-        ///         "Name": "Andy",
-        ///         "Picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png"
-        ///     },
-        /// </example>
-        public UserDataDto userdata { get; set; }
     }
-    public class GetAllArticlesDto200
+    public class GetUserNewArticlesDto200
     {
         /// <example>200</example>
         public string StatusCode { get; set; }
@@ -45,9 +33,7 @@ namespace DotnetWebApi.Dto
         ///         "contents": "string",
         ///         "createdAt": "2023-04-22T20:49:32.71",
         ///         "updatedAt": "2023-04-22T20:49:32.71",
-        ///         "userdata": {
-        ///             "name": "Andy1"
-        ///         }
+        ///         "flowerCount": 0
         ///     },
         ///     {
         ///         "id": 4,
@@ -56,19 +42,24 @@ namespace DotnetWebApi.Dto
         ///         "contents": "string",
         ///         "createdAt": "2023-04-22T20:49:32.71",
         ///         "updatedAt": "2023-04-22T20:49:32.71",
-        ///         "userdata": {
-        ///             "name": "Andy1"
-        ///         }
+        ///         "flowerCount": 0
         ///     }
         /// ]
         /// </example>
         public object[] articles { get; set; }
     }
-    public class GetAllArticlesDto500
+    public class GetUserNewArticlesDto404
+    {
+        /// <example>404</example>
+        public string StatusCode { get; set; }
+        /// <example>使用者沒有文章</example>
+        public string title { get; set; }
+    }
+    public class GetUserNewArticlesDto500
     {
         /// <example>500</example>
         public string StatusCode { get; set; }
-        /// <example>取得所有文章失敗</example>
+        /// <example>取得個人所有文章</example>
         public string title { get; set; }
     }
 }

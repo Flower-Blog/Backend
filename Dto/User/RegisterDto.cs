@@ -15,6 +15,8 @@ namespace DotnetWebApi.Dto
         public string Email { get; set; }
         /// <example>false</example>
         public bool admin { get; set; }
+        /// <example>1</example>
+        public int FlowerId { get; set; }
     }
     public class RegisterDto201
     {
