@@ -1,4 +1,10 @@
 // appsettings.json
 "constring": "Server=192.168.1.95;Database=Blog;User ID=SA;Password=@Password123;Trust Server Certificate=true"
 
+資料庫要記得選 Chinese_Taiwan_Stroke_CS_AS
 
+啟動前指令:
+1.手動刪除DotnetWebApi.csproj的usersecret
+2.dotnet user-secrets clear
+3.cat ./secret.json | dotnet user-secrets set
+4.sudo dotnet run &

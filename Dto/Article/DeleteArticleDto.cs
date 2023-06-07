@@ -11,9 +11,9 @@ namespace DotnetWebApi.Dto
         /// <example>內容</example>
         public string Contents { get; set; }
     }
-    public class DeleteArticleDto204
+    public class DeleteArticleDto200
     {
-        /// <example>204</example>
+        /// <example>200</example>
         public string StatusCode { get; set; }
         /// <example>刪除成功</example>
         public string title { get; set; }

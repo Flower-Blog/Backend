@@ -29,6 +29,13 @@ namespace DotnetWebApi.Dto
         public string Contents { get; set; }
         /// <exaple>23</exaple>
         public int FlowerCount { get; set; }
+        /// <example>
+        ///     {
+        ///         "Name": "Andy",
+        ///         "Picture": "https://localhost:3000/Picture/0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089/image.png"
+        ///     },
+        /// </example>
+        public UserDataDto userdata { get; set; }
         /// <exaple>2023-04-22T20:49:32.71</exaple>
         public DateTime CreatedAt { get; set; }
         /// <exaple>2023-04-22T20:49:32.71</exaple>

@@ -98,7 +98,7 @@ app.UseCors();
 
 app.UseStaticFiles();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 // 驗證
 app.UseAuthentication();
 // 授權

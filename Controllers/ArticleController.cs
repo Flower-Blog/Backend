@@ -25,18 +25,18 @@ namespace DotnetWebApi.Controllers
         /// <summary>
         /// 取得所有文章(最新)
         /// </summary>
-        [HttpGet("/articles")]
-        [ProducesResponseType(typeof(GetAllArticlesDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetAllArticlesDto500), StatusCodes.Status500InternalServerError)]
-        public ActionResult GetAllArticles()
+        [HttpGet("/articles/new")]
+        [ProducesResponseType(typeof(GetAllNewArticlesDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetAllNewArticlesDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GetAllNewArticles()
         {
             try
             {
                 // 拿取所有文章
-                var articles = _dbContext.Articles
+                var articlesQuery = _dbContext.Articles
                                          .Include(a => a.User)
                                          .Where(a => a.State == true)
-                                         .Select(a => new GetAllArticlesDto
+                                         .Select(a => new GetAllNewArticlesDto
                                          {
                                              Id = a.Id,
                                              Title = a.Title,
@@ -52,8 +52,51 @@ namespace DotnetWebApi.Controllers
                                              },
                                          })
                                          .OrderByDescending(a => a.CreatedAt)
-                                         .Take(10)
-                                         .ToList();
+                                         .Take(10);
+                var articles = articlesQuery.Any() ? articlesQuery.ToList() : new List<GetAllNewArticlesDto>();
+
+                return Ok(new { StatusCode = 200, articles });
+            }
+            catch
+            {
+                return StatusCode(500, "取得所有文章失敗");
+            }
+        }
+        /// <summary>
+        /// 取得所有文章(最熱門)
+        /// </summary>
+        [HttpGet("/articles/hot")]
+        [ProducesResponseType(typeof(GetAllNewArticlesDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetAllNewArticlesDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GetAllHotArticles()
+        {
+            try
+            {
+                // 拿取所有文章
+                var articlesQuery = _dbContext.Articles
+                                         .Include(a => a.User)
+                                         .Where(a => a.State == true)
+                                         .Select(a => new GetAllNewArticlesDto
+                                         {
+                                             Id = a.Id,
+                                             Title = a.Title,
+                                             SubStandard = a.SubStandard,
+                                             Contents = a.Contents,
+                                             FlowerCount = a.FlowerCount,
+                                             CreatedAt = a.CreatedAt,
+                                             UpdatedAt = a.UpdatedAt,
+                                             userdata = new UserDataDto
+                                             {
+                                                 Name = a.User.Name,
+                                                 Picture = a.User.Picture
+                                             },
+                                         })
+                                         .OrderByDescending(a => a.FlowerCount)
+                                         .ThenByDescending(a => a.CreatedAt)
+                                         .Take(10);
+
+                var articles = articlesQuery.Any() ? articlesQuery.ToList() : new List<GetAllNewArticlesDto>();
+
                 return Ok(new { StatusCode = 200, articles });
             }
             catch
@@ -67,19 +110,19 @@ namespace DotnetWebApi.Controllers
         /// </summary>
         /// <param name="address" example="0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089">錢包地址</param>
         /// <returns></returns>
-        [HttpGet("/articles/user/{address}")]
-        [ProducesResponseType(typeof(GetUserArticlesDto200), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(GetUserArticlesDto404), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(GetUserArticlesDto500), StatusCodes.Status500InternalServerError)]
-        public ActionResult GetUserArticles(string address)
+        [HttpGet("/articles/user/{address}/new")]
+        [ProducesResponseType(typeof(GetUserNewArticlesDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserNewArticlesDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(GetUserNewArticlesDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GetUserNewArticles(string address)
         {
             try
             {
                 // 拿取單一文章
-                var articles = (_dbContext.Articles
+                var articlesQuery = (_dbContext.Articles
                                           .Include(a => a.User)
                                           .Where(a => a.State == true && a.User.Address == address)
-                                          .Select(a => new GetUserArticlesDto
+                                          .Select(a => new GetUserNewArticlesDto
                                           {
                                               Id = a.Id,
                                               Title = a.Title,
@@ -90,9 +133,53 @@ namespace DotnetWebApi.Controllers
                                               UpdatedAt = a.UpdatedAt
                                           }))
                                           .OrderByDescending(a => a.CreatedAt)
-                                          .Take(10)
-                                          .ToList();
-                if (articles.Count != 0)
+                                          .Take(10);
+                var articles = articlesQuery.Any() ? articlesQuery.ToList() : new List<GetUserNewArticlesDto>();
+
+                if (articlesQuery.Any())
+                    return Ok(new { StatusCode = 200, articles });
+                else
+                    return NotFound(new { StatusCode = 404, title = "使用者沒有文章" });
+            }
+            catch
+            {
+                return StatusCode(500, "取得個人所有文章");
+            }
+        }
+
+        /// <summary>
+        /// 取得個人所有文章(最熱門)
+        /// </summary>
+        /// <param name="address" example="0xEFa4Abac7FedB8F0514beE7212dc19D523DD3089">錢包地址</param>
+        /// <returns></returns>
+        [HttpGet("/articles/user/{address}/hot")]
+        [ProducesResponseType(typeof(GetUserNewArticlesDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserNewArticlesDto404), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(GetUserNewArticlesDto500), StatusCodes.Status500InternalServerError)]
+        public ActionResult GetUserHotArticles(string address)
+        {
+            try
+            {
+                // 拿取單一文章
+                var articlesQuery = (_dbContext.Articles
+                                          .Include(a => a.User)
+                                          .Where(a => a.State == true && a.User.Address == address)
+                                          .Select(a => new GetUserNewArticlesDto
+                                          {
+                                              Id = a.Id,
+                                              Title = a.Title,
+                                              SubStandard = a.SubStandard,
+                                              Contents = a.Contents,
+                                              FlowerCount = a.FlowerCount,
+                                              CreatedAt = a.CreatedAt,
+                                              UpdatedAt = a.UpdatedAt
+                                          }))
+                                         .OrderByDescending(a => a.FlowerCount)
+                                         .ThenByDescending(a => a.CreatedAt)
+                                         .Take(10);
+                var articles = articlesQuery.Any() ? articlesQuery.ToList() : new List<GetUserNewArticlesDto>();
+
+                if (articlesQuery.Any())
                     return Ok(new { StatusCode = 200, articles });
                 else
                     return NotFound(new { StatusCode = 404, title = "使用者沒有文章" });
@@ -148,6 +235,11 @@ namespace DotnetWebApi.Controllers
                                              CreatedAt = a.CreatedAt,
                                              UpdatedAt = a.UpdatedAt,
                                              FlowerCount = a.FlowerCount,
+                                             userdata = new UserDataDto
+                                             {
+                                                 Name = a.User.Name,
+                                                 Picture = a.User.Picture
+                                             },
                                              Comments = comments.ToArray()
                                          })).FirstOrDefault();
                 if (article != null)
@@ -301,7 +393,7 @@ namespace DotnetWebApi.Controllers
         /// <returns></returns>
         [HttpDelete("/articles/{id}")]
         [Authorize(Roles = "user,admin")]
-        [ProducesResponseType(typeof(DeleteArticleDto204), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(DeleteArticleDto200), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DeleteArticleDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(DeleteArticleDto403), StatusCodes.Status403Forbidden)]
         [ProducesResponseType(typeof(DeleteArticleDto404), StatusCodes.Status404NotFound)]
@@ -371,14 +463,11 @@ namespace DotnetWebApi.Controllers
 
 
                     transaction.Commit();
-                    return new ObjectResult(new
+                    return Ok(new
                     {
-                        title = "刪除成功",
-                        status = 204,
-                    })
-                    {
-                        StatusCode = 204
-                    };
+                        StatusCode = 200,
+                        title = "刪除成功"
+                    });
                 }
                 catch (Exception)
                 {
@@ -394,6 +483,7 @@ namespace DotnetWebApi.Controllers
         [HttpPost("/articles/flower")]
         [Authorize(Roles = "user,admin")]
         [ProducesResponseType(typeof(GiveFlowerDto200), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GiveFlowerDto400), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(GiveFlowerDto401), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(GiveFlowerDto500), StatusCodes.Status500InternalServerError)]
         public ActionResult GiveFlower([FromBody] GiveFlowerDto value)
@@ -426,12 +516,39 @@ namespace DotnetWebApi.Controllers
                 ArticleId = value.ArticleId,
             };
             var Article = _dbContext.Articles.SingleOrDefault(u => u.Id == value.ArticleId);
+            var UserFlower = _dbContext.FlowerOwnerships.SingleOrDefault(u => u.UserId == userId && u.Flowerid == value.FlowerId);
+            var CreaterFlower = _dbContext.FlowerOwnerships.SingleOrDefault(u => u.UserId == Article.UserId && u.Flowerid == value.FlowerId);
 
+
+            if (UserFlower.FlowerCount == 0)
+            {
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = "你的花不夠"
+                });
+            }
+            if (userId == Article.UserId)
+            {
+                return BadRequest(new
+                {
+                    type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                    title = "One or more validation errors occurred.",
+                    status = 400,
+                    errors = "很抱歉，不可以送自己花"
+                });
+            }
             try
             {
                 _dbContext.FlowerGivers.Add(record);
                 Article.FlowerCount = Article.FlowerCount + 1;
+                UserFlower.FlowerCount = UserFlower.FlowerCount - 1;
+                CreaterFlower.FlowerCount = CreaterFlower.FlowerCount + 1;
                 _dbContext.Entry(Article).State = EntityState.Modified;
+                _dbContext.Entry(UserFlower).State = EntityState.Modified;
+                _dbContext.Entry(CreaterFlower).State = EntityState.Modified;
                 _dbContext.SaveChanges();
             }
             catch

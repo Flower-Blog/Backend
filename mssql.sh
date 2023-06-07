@@ -1,5 +1,4 @@
 #!/bin/bash
-Chinese_Taiwan_Stroke_CS_AS
 # SQL 創建表
 CREATE TABLE [Users] (
   [Id] int PRIMARY KEY NOT NULL IDENTITY(1, 1),
@@ -22,7 +21,7 @@ CREATE TABLE [Articles] (
   [Title] varchar(42) NOT NULL,
   [SubStandard] varchar(100) NOT NULL,
   [Contents] nvarchar(max) NOT NULL,
-  [Flowers] int DEFAULT (0),
+  [FlowerCount] int DEFAULT (0),
   [State] bit NOT NULL,
   [CreatedAt] datetime NOT NULL DEFAULT (getdate()),
   [UpdatedAt] datetime NOT NULL DEFAULT (getdate())
@@ -112,37 +111,6 @@ GO
 ALTER TABLE [FlowerOwnership] ADD FOREIGN KEY ([Flowerid]) REFERENCES [Flowers] ([Id])
 GO
 
-GO
-
-ALTER TABLE [Articles] ADD FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
-GO
-
-ALTER TABLE [Comments] ADD FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
-GO
-
-ALTER TABLE [Comments] ADD FOREIGN KEY ([ArticleId]) REFERENCES [Articles] ([Id])
-GO
-
-ALTER TABLE [CommentLikes] ADD FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
-GO
-
-ALTER TABLE [CommentLikes] ADD FOREIGN KEY ([CommentId]) REFERENCES [Comments] ([Id])
-GO
-
-ALTER TABLE [FlowerGiver] ADD FOREIGN KEY ([FlowerId]) REFERENCES [Flowers] ([Id])
-GO
-
-ALTER TABLE [FlowerGiver] ADD FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
-GO
-
-ALTER TABLE [FlowerGiver] ADD FOREIGN KEY ([ArticleId]) REFERENCES [Articles] ([Id])
-GO
-
-ALTER TABLE [FlowerOwnership] ADD FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
-GO
-
-ALTER TABLE [FlowerOwnership] ADD FOREIGN KEY ([Flowerid]) REFERENCES [Flowers] ([Id])
-GO
 
 # SQL 新增預設
 INSERT INTO Users

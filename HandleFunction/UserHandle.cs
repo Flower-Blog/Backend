@@ -13,5 +13,19 @@ namespace DotnetWebApi.HandleFunction
             if (BackgroundPhoto) return "wwwroot//BackgroundPhoto//" + username;
             return "wwwroot//Picture//" + username;
         }
+        public string GetUserImageFileType(string url)
+        {
+            string file_type = "";
+            if (url != null)
+            {
+                int lastIndex = url.LastIndexOf(".");
+                if (lastIndex != -1)
+                {
+                    file_type = url.Substring(lastIndex + 1);
+                    return file_type;
+                }
+            }
+            return file_type;
+        }
     }
 }
